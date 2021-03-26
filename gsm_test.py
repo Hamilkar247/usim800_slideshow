@@ -1,6 +1,7 @@
 from usim800.usim800 import sim800
 import os
 import json
+import logging
 
 class GsmHami:
     def __init__(self):
@@ -16,12 +17,11 @@ class GsmHami:
 
     def download_config(self):
         nazwa_configa="config.json"
-        #self.gsm.requests.get(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
-        self.gsm.requests.getConfig(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+        self.gsm.requests.getFile(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
         self.r = self.gsm.requests
         self.test_print()
         if os.path.isfile(nazwa_configa):
-          print("juz byl config")
+          print("juz byl config, zostanie zastapiony")
         else:
             f=open(nazwa_configa, "w+")
         with open(nazwa_configa, 'wb') as file_json:
@@ -30,11 +30,11 @@ class GsmHami:
 
     def download_picture(self):
         nazwa_obrazka="widget.png"
-        self.gsm.requests.get(url="https://134.122.69.201/widgetKozienice/")
+        self.gsm.requests.getFile(url="https://134.122.69.201/widgetKozienice/")
         self.r = self.gsm.requests
-        self.testPrint()
+        self.test_print()
         if os.path.isfile(nazwa_obrazka):
-           print("już był "+nazwa_obrazka)
+           print("już był "+nazwa_obrazka+"zostanie zastąpiony")
         else:
             f=open(nazwa_obrazka, "w+")
         with open(nazwa_obrazka, "wb") as widgetpng:
@@ -47,7 +47,8 @@ class GsmHami:
         print("koniec sms funkcji: "+numer_docelowy)
 
 if __name__ == "__main__":
+    logging.root.setLevel(logging.DEBUG)
     gsm_hami = GsmHami()
-    gsm_hami.download_config()
-    #gsm_hami.download_picture()
+    #gsm_hami.download_config()
+    gsm_hami.download_picture()
     #gsm_hami.send_sms()
