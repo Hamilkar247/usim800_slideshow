@@ -16,7 +16,8 @@ class GsmHami:
 
     def download_config(self):
         nazwa_configa="config.json"
-        self.gsm.requests.get(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+        #self.gsm.requests.get(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+        self.gsm.requests.getConfig(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
         self.r = self.gsm.requests
         self.test_print()
         if os.path.isfile(nazwa_configa):
