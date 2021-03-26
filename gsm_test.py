@@ -2,43 +2,51 @@ from usim800.usim800 import sim800
 import os
 import json
 
-def testPrint(r):
-    print("statusCode:"+str(r.status_code))
-    print("content:"+str(r.content))
-    print("json:"+str(r.json()))
-    print("IP:"+str(r.IP))
+class GsmHami:
+    def __init__(self):
+       self.gsm = sim800(baudrate=9600, path="/dev/ttyUSB0")
+       self.gsm.requests._APN = "internet"
+       self.r = None
 
-def downloadConfig():
-    gsm.requests.get(url="http://134.122.69.201/configKozienice/")
-    r = gsm.requests
-    testPrint(r)
-    if os.path.isfile('config.json'):
-      print("juz byl config")
-    else:
-        f=open("config.json", "w+")
-    with open("config.json", 'wb') as file_json:
-        file_json.write(r.content)
-    print("koniec downloadConfig funkcji")
+    def test_print(self):
+        print("statusCode:"+str(self.r.status_code))
+        print("content:"+str(self.r.content))
+        print("json:"+str(self.r.json()))
+        print("IP:"+str(self.r.IP))
 
-def downloadPicture():
-    gsm.requests.get(url="https://134.122.69.201/widgetKozienice/")
-    r = gsm.requests
-    testPrint(r)
-    if os.path.isfile('widget.png'):
-       print("już był widget.png")
-    else:
-        f=open("widget.png", "w+")
-    with open("widget.png", "wb") as widgetpng:
-        widgetpng.write(r.content)
+    def download_config(self):
+        nazwa_configa="config.json"
+        self.gsm.requests.get(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+        self.r = self.gsm.requests
+        self.test_print()
+        if os.path.isfile(nazwa_configa):
+          print("juz byl config")
+        else:
+            f=open(nazwa_configa, "w+")
+        with open(nazwa_configa, 'wb') as file_json:
+            file_json.write(self.r.content)
+        print("koniec downloadConfig funkcji")
 
-def send_sms():
-    numer_docelowy="+48532819627"
-    gsm.sms.send(numer_docelowy, "Helena, mam zawał")
-    print("koniec sms funkcji: "+numer_docelowy)
+    def download_picture(self):
+        nazwa_obrazka="widget.png"
+        self.gsm.requests.get(url="https://134.122.69.201/widgetKozienice/")
+        self.r = self.gsm.requests
+        self.testPrint()
+        if os.path.isfile(nazwa_obrazka):
+           print("już był "+nazwa_obrazka)
+        else:
+            f=open(nazwa_obrazka, "w+")
+        with open(nazwa_obrazka, "wb") as widgetpng:
+            widgetpng.write(self.r.content)
+        print("koniec downloadPicture funkcji")
+
+    def send_sms(self):
+        numer_docelowy="+48532819627"
+        self.gsm.sms.send(numer_docelowy, "Helena, mam zawał")
+        print("koniec sms funkcji: "+numer_docelowy)
 
 if __name__ == "__main__":
-    gsm  = sim800(baudrate=9600, path="/dev/ttyUSB0")
-    gsm.requests._APN = "internet"
-    downloadConfig()
-    #downloadPicture()
-    #send_sms()
+    gsm_hami = GsmHami()
+    gsm_hami.download_config()
+    #gsm_hami.download_picture()
+    #gsm_hami.send_sms()
