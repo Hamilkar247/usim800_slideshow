@@ -1,8 +1,8 @@
-from usim800.Parser.ATParser import Parser
+from usim800.Parser.ATParser import Parser, ParserConfigJson, ParserFile
 import time
 from usim800.Communicate import communicate
 from usim800.Parser import JsonParser
-
+import logging
 
 class request(communicate):
 
@@ -100,22 +100,27 @@ class request(communicate):
         self._IP = self._bearer(self._APN)
 
         cmd = "AT + HTTPINIT"
+        logging.debug(f"{cmd}")
         self._send_cmd(cmd)
         cmd = 'AT + HTTPPARA="CID",1'
+        logging.debug(f"{cmd}")
         self._send_cmd(cmd)
 
         cmd = 'AT + HTTPPARA="URL","{}"'.format(url)
+        logging.debug(f"{cmd}")
         self._send_cmd(cmd)
         time.sleep(3)
         cmd = "AT +HTTPACTION=0"
 
+        logging.debug(f"{cmd}")
         self._send_cmd(cmd)
         time.sleep(2)
         cmd = "AT +HTTPREAD"
+        logging.debug(f"{cmd} get_decode_data=True")
         self._send_cmd(cmd, get_decode_data=True)
         data = self._getdata(
             data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0)
-        tk = Parser(data)
+        tk = ParserFile(data)
         token = tk.tokenizer()
         self._content = tk.parser
         if (len(token) == 4):
@@ -129,6 +134,7 @@ class request(communicate):
             jph = JsonParser.ATJSONObjectParser(string)
             self._json = jph.JSONObject
         cmd = "AT +SAPBR=0,1"
+        logging.debug(f"{cmd}")
         self._send_cmd(cmd)
 
         return self._status_code
