@@ -17,7 +17,7 @@ class GsmHami:
 
     def download_config(self):
         nazwa_configa="config.json"
-        self.gsm.requests.getFile(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+        self.gsm.requests.getConfig(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
         self.r = self.gsm.requests
         self.test_print()
         if os.path.isfile(nazwa_configa):
@@ -36,7 +36,7 @@ class GsmHami:
         if os.path.isfile(nazwa_obrazka):
            print("już był "+nazwa_obrazka+"zostanie zastąpiony")
         else:
-            f=open(nazwa_obrazka, "w+")
+            f=open(nazwa_obrazka, "w+b")
         with open(nazwa_obrazka, "wb") as widgetpng:
             widgetpng.write(self.r.content)
         print("koniec downloadPicture funkcji")
