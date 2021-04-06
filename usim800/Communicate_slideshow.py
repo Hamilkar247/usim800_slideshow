@@ -43,27 +43,34 @@ class communicate_slideshow:
         receive = self._port.read(numberOfBytes)
         return receive
 
-    def _bearer(self, APN): #myśle że chodzi w nazwie o definiowanie nośnej
+    def _bearer(self, APN):  # myśle że chodzi w nazwie o definiowanie nośnej
         self._ATcmd()
-        cmd = "AT+SABR=0,1" #nie wiem co do końca robi - do weryfikacji
+        cmd = "AT+SABR=0,1"  # nie wiem co do końca robi - do weryfikacji
         self._send_cmd(cmd)
         self._ATcmd()
         # przełączenie na transmisje GPRS
         cmd = 'AT+SAPBR=3,1, "CONTYPE", "GPRS"'
         self._send_cmd(cmd)
-        #Accest point name - definiuje ścieżkę sieciową dla wszystkich połączeń z siecią komórkową danych
+        # Accest point name - definiuje ścieżkę sieciową dla wszystkich połączeń z siecią komórkową danych
         cmd = 'AT+SAPBR=3,1, "APN", "{}'.format(APN)
         self._send_cmd(cmd)
-        #otwiera zawa
+        # otwiera zawa
         cmd = "AT+SAPBR=1,1"
         self._send_cmd(cmd)
+        cmd = "AT+SAPBR=2,1"
+        data = self._send_cmd(cmd, return_data=True)
+        try:
+            IP = data.decode().split()[4].split(",")[-1].replace('"', '')
+        except:
+            IP = None
+        return IP
 
     def _getdata(self, data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0):
         logging.debug(f"Communicate_slideshow.py - _getdata")
         receive = self._port.read(1)
-        #logging.debug(f"receive:{rcv}")
+        # logging.debug(f"receive:{rcv}")
         if receive == till:
-            #logging.debug(f"receive==till --> {receive}"}
+            # logging.debug(f"receive==till --> {receive}"}
             counter += 1
             if counter == count:
                 data_to_decode.append(receive)
@@ -72,8 +79,6 @@ class communicate_slideshow:
                 data_to_decode.append(receive)
                 return self._getdata(data_to_decode, string_to_decode, till, count, counter)
         else:
-            #logging.debug("receive!=till")
+            # logging.debug("receive!=till")
             data_to_decode.append(receive)
             return self._getdata(data_to_decode, string_to_decode, till, count, counter)
-
-
