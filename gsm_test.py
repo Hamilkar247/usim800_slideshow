@@ -3,6 +3,8 @@ import os
 import json
 import logging
 
+from usim800.usim800_slideshow import sim800_slideshow
+
 
 class GsmHami:
     def __init__(self):
@@ -48,9 +50,16 @@ class GsmHami:
         print("koniec sms funkcji: " + numer_docelowy)
 
 
+class GsmSlideshow:
+    def __init__(self):
+        self.gsm = sim800_slideshow(baudrate=115200, path="/dev/ttyUSB0")
+
+
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
     gsm_hami = GsmHami()
+
+    gsm_slideshow = GsmSlideshow()
     # gsm_hami.download_config()
-    gsm_hami.download_picture()
+    # gsm_hami.download_picture()
     # gsm_hami.send_sms()
