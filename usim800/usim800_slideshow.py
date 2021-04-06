@@ -7,7 +7,7 @@ class sim800_slideshow:#(communicate_slideshow):
     def __init__(self, baudrate, path):
         self.port = serial.Serial(path, baudrate, timeout=sim800_slideshow.TIMEOUT)
         print("port: "+str(self.port))
-        #super().__init__(self.port)
+        super().__init__(self.port)
         # self.requests
         ###self.info = info(self.port)
         ###self.sms = sms(self.port)

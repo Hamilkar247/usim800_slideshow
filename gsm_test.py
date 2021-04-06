@@ -59,7 +59,7 @@ if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
     gsm_hami = GsmHami()
 
-    gsm_slideshow = GsmSlideshow()
+    #gsm_slideshow = GsmSlideshow()
     # gsm_hami.download_config()
     # gsm_hami.download_picture()
     # gsm_hami.send_sms()
