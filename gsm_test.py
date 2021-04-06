@@ -54,11 +54,27 @@ class GsmSlideshow:
     def __init__(self):
         self.gsm = sim800_slideshow(baudrate=115200, path="/dev/ttyUSB0")
         self.gsm.requests._APN = "internet"
+        self.r = None
 
-    #def download_file(self):
-    #    nazwa_plika="config.json"
-    #    self.gsm.request.getConfig(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
-    #    self.gsm
+    def download_file(self):
+        nazwa_plika="config.json"
+        self.gsm.request.getConfig(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+        self.r = self.gsm.requests
+        self.test_print()
+        if os.path.isfile(nazwa_plika):
+            print("uwaga już był plik pobrany")
+        else:
+            f = open(nazwa_plika, "w+")
+        with open(nazwa_plika, 'wb') as file:
+            file.write(self.r.content)
+        logging.debug("koniec pliku")
+
+    def test_print(self):
+        print("statusCode:" + str(self.r.status_code))
+        print("content:" + str(self.r.content))
+        print("json:" + str(self.r.json()))
+        print("IP:" + str(self.r.IP))
+
 
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
