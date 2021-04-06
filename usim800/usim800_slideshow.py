@@ -1,6 +1,6 @@
 import serial
 from usim800.Communicate_slideshow import communicate_slideshow
-from usim800.Request import request
+from usim800.Request_slideshow import request_slideshow
 
 
 class sim800_slideshow(communicate_slideshow):
