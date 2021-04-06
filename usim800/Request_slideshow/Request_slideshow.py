@@ -23,7 +23,36 @@ class request_slideshow(communicate_slideshow):
         self._url = None
         self._IP = None
 
+    @property
+    def text(self):
+        return self._text
+
+    @property
+    def IP(self):
+        return self._IP
+
+    @property
+    def APN(self):
+        return self._APN
+
+    @APN.setter
+    def APN(self, APN):
+        self._APN = APN
+
+    @property
+    def url(self):
+        return self._url
+
+    @property
+    def content(self):
+        return self._content
+
+    @property
+    def status_code(self):
+        return self._status_code
+
     def getFile(self, url, header=None):
+        logging.debug("Jestem w getFile")
         self.init()
         self._url = url
         self._IP = self._bearer(self._APN)
@@ -40,7 +69,8 @@ class request_slideshow(communicate_slideshow):
         self._send_cmd(cmd)
         time.sleep(2)
         cmd = "AT+HTTPREAD"
-        self._send_cmd(cmd, get_decode_data=True)
+        text=self._send_cmd(cmd, get_decode_data=True)
+        logging.debug(f"ahjo text {text}")
         data = self._getdata(
             data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0)
         #tk = ParserFile(data)
