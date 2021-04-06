@@ -53,13 +53,19 @@ class GsmHami:
 class GsmSlideshow:
     def __init__(self):
         self.gsm = sim800_slideshow(baudrate=115200, path="/dev/ttyUSB0")
+        self.gsm.requests._APN = "internet"
 
+    #def download_file(self):
+    #    nazwa_plika="config.json"
+    #    self.gsm.request.getConfig(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+    #    self.gsm
 
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
-    #gsm_hami = GsmHami()
-
-    gsm_slideshow = GsmSlideshow()
-    # gsm_hami.download_config()
+    gsm_hami = GsmHami()
+    gsm_hami.download_config()
     # gsm_hami.download_picture()
     # gsm_hami.send_sms()
+
+    #gsm_slideshow = GsmSlideshow()
+
