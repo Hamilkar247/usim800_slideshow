@@ -28,7 +28,7 @@ class Parser:
             token = []
             if letter in self.separator:
                 notin = True
-        #         print(i ,x,notin)
+                #         print(i ,x,notin)
                 self.stack.push(letter)
                 while not self.queue.empty():
                     token.append(self.queue.get())
@@ -43,13 +43,14 @@ class Parser:
         text = text.replace(b"\r", b"")
         text = "".join(text.decode().split("\n")[2:])
         text = "".join(text.split("OK")[0])
-        return(text)
+        return (text)
 
     def BytesParser(self, text):
         text = text.replace(b"\r", b"")
         text = b"".join(text.split(b"\n")[2:])
         text = text.split(b"OK")[0]
         return text
+
 
 class ParserConfigJson:
 
@@ -76,7 +77,7 @@ class ParserConfigJson:
             token = []
             if letter in self.separator:
                 notin = True
-        #         print(i ,x,notin)
+                #         print(i ,x,notin)
                 self.stack.push(letter)
                 while not self.queue.empty():
                     token.append(self.queue.get())
@@ -91,13 +92,14 @@ class ParserConfigJson:
         text = text.replace(b"\r", b"")
         text = "".join(text.decode().split("\n")[2:])
         text = "".join(text.split("OK")[0])
-        return(text)
+        return (text)
 
     def BytesParser(self, text):
         text = text.replace(b"\r", b"")
         text = b"".join(text.split(b"\n")[2:])
         text = text.split(b"OK")[0]
         return text
+
 
 class ParserFile:
 
@@ -124,7 +126,7 @@ class ParserFile:
             token = []
             if letter in self.separator:
                 notin = True
-        #         print(i ,x,notin)
+                #         print(i ,x,notin)
                 self.stack.push(letter)
                 while not self.queue.empty():
                     token.append(self.queue.get())
@@ -136,13 +138,13 @@ class ParserFile:
         return self.tokens
 
     def Parser(self, text):
-        #text = text.replace(b"\r", b"")
-        #text = "".join(text.decode().split("\n")[2:])
-        #text = "".join(text.split("OK")[0])
-        return(text)
+        # text = text.replace(b"\r", b"")
+        # text = "".join(text.decode().split("\n")[2:])
+        # text = "".join(text.split("OK")[0])
+        return (text)
 
     def BytesParser(self, text):
-        #text = text.replace(b"\r", b"")
-        #text = b"".join(text.split(b"\n")[2:])
-        #text = text.split(b"OK")[0]
+        # text = text.replace(b"\r", b"")
+        # text = b"".join(text.split(b"\n")[2:])
+        # text = text.split(b"OK")[0]
         return text
