@@ -30,7 +30,7 @@ class GsmHami:
 
     def download_picture(self):
         nazwa_obrazka="widget.png"
-        self.gsm.requests.getFile(url="https://134.122.69.201/widgetKozienice/")
+        self.gsm.requests.getFile(url="http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png")
         self.r = self.gsm.requests
         self.test_print()
         if os.path.isfile(nazwa_obrazka):

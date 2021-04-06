@@ -115,7 +115,7 @@ class request(communicate):
         self._send_cmd(cmd, get_decode_data=True)
         data = self._getdata(
             data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0)
-        tk = Parser(data)
+        tk = ParserFile(data)
         token = tk.tokenizer()
         self._content = tk.parser
         if (len(token) == 4):
