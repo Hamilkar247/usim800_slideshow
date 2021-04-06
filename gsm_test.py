@@ -57,16 +57,19 @@ class GsmSlideshow:
         self.r = None
 
     def download_file(self):
-        nazwa_plika="config.json"
-        self.gsm.request.getConfig(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
-        self.r = self.gsm.requests
-        self.test_print()
-        if os.path.isfile(nazwa_plika):
-            print("uwaga już był plik pobrany")
-        else:
-            f = open(nazwa_plika, "w+")
-        with open(nazwa_plika, 'wb') as file:
-            file.write(self.r.content)
+        try:
+            nazwa_plika="config.json"
+            self.gsm.requests.getFile(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+            self.r = self.gsm.requests
+            self.test_print()
+            if os.path.isfile(nazwa_plika):
+                print("uwaga już był plik pobrany")
+            else:
+                f = open(nazwa_plika, "w+")
+            with open(nazwa_plika, 'wb') as file:
+                file.write(self.r.content)
+        except:
+            print("Niestety jest błąd")
         logging.debug("koniec pliku")
 
     def test_print(self):
@@ -78,10 +81,9 @@ class GsmSlideshow:
 
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
-    gsm_hami = GsmHami()
-    gsm_hami.download_config()
-    # gsm_hami.download_picture()
-    # gsm_hami.send_sms()
+    #gsm_hami = GsmHami()
+    #gsm_hami.download_config()
 
-    #gsm_slideshow = GsmSlideshow()
+    gsm_slideshow = GsmSlideshow()
+    gsm_slideshow.download_file()
 

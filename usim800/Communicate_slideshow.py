@@ -62,6 +62,7 @@ class communicate_slideshow:
         try:
             IP = data.decode().split()[4].split(",")[-1].replace('"', '')
         except:
+            print("nie złapało nam IP - zwracam None")
             IP = None
         return IP
 
