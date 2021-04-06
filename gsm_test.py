@@ -5,7 +5,7 @@ import logging
 
 class GsmHami:
     def __init__(self):
-       self.gsm = sim800(baudrate=9600, path="/dev/ttyUSB0")
+       self.gsm = sim800(baudrate=115200, path="/dev/ttyUSB0")
        self.gsm.requests._APN = "internet"
        self.r = None
 
