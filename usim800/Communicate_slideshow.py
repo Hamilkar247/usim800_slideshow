@@ -39,3 +39,7 @@ class communicate_slideshow:
                 print(receive.decode())
             if return_data:
                 return receive
+
+    def _read_sent_data(self, numberOfBytes):
+        receive = self._port.read(numberOfBytes)
+        return receive
