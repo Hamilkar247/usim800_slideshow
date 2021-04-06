@@ -8,7 +8,6 @@ class communicate_slideshow:
 
     def __init__(self, port):
         self._port = port
-        self._port = 0
 
     def _setcmd(self, cmd, end='\r\n'):
         end = '\r\n'
