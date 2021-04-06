@@ -58,5 +58,22 @@ class communicate_slideshow:
         cmd = "AT+SAPBR=1,1"
         self._send_cmd(cmd)
 
+    def _getdata(self, data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0):
+        logging.debug(f"Communicate_slideshow.py - _getdata")
+        receive = self._port.read(1)
+        #logging.debug(f"receive:{rcv}")
+        if receive == till:
+            #logging.debug(f"receive==till --> {receive}"}
+            counter += 1
+            if counter == count:
+                data_to_decode.append(receive)
+                return b"".join(data_to_decode)
+            else:
+                data_to_decode.append(receive)
+                return self._getdata(data_to_decode, string_to_decode, till, count, counter)
+        else:
+            #logging.debug("receive!=till")
+            data_to_decode.append(receive)
+            return self._getdata(data_to_decode, string_to_decode, till, count, counter)
 
 
