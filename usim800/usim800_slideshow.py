@@ -1,7 +1,8 @@
 import serial
+from usim800.Communicate_slideshow import communicate_slideshow
 
+class sim800_slideshow(communicate_slideshow):
 
-class sim800_slideshow:#(communicate_slideshow):
     TIMEOUT = 1
 
     def __init__(self, baudrate, path):
