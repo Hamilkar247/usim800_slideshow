@@ -13,8 +13,12 @@ class communicate_slideshow:
         return (cmd + end)
 
     def _readtill(self, till="OK"):
-        receive = self._port.read(14816)      #ta liczba to się wydaje że to liczba bajtów
+        receive = self._port.read(14816)      #ta liczba to się wydaje że to liczba zczytanych bajtów
         receive_decode= receive.decode()
         while "OK" not in receive_decode:
             receive_decode += receive_decode.decode()
             receive = self._port.read(14816)
+
+    def _ATcmd(self):
+        self._port.write(self._setcmd("AT").encode())
+        receive = self._port.read(14816)
