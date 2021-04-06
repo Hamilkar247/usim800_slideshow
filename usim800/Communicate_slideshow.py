@@ -42,3 +42,21 @@ class communicate_slideshow:
     def _read_sent_data(self, numberOfBytes):
         receive = self._port.read(numberOfBytes)
         return receive
+
+    def _bearer(self, APN): #myśle że chodzi w nazwie o definiowanie nośnej
+        self._ATcmd()
+        cmd = "AT+SABR=0,1" #nie wiem co do końca robi - do weryfikacji
+        self._send_cmd(cmd)
+        self._ATcmd()
+        # przełączenie na transmisje GPRS
+        cmd = 'AT+SAPBR=3,1, "CONTYPE", "GPRS"'
+        self._send_cmd(cmd)
+        #Accest point name - definiuje ścieżkę sieciową dla wszystkich połączeń z siecią komórkową danych
+        cmd = 'AT+SAPBR=3,1, "APN", "{}'.format(APN)
+        self._send_cmd(cmd)
+        #otwiera zawa
+        cmd = "AT+SAPBR=1,1"
+        self._send_cmd(cmd)
+
+
+
