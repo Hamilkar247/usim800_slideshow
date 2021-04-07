@@ -32,12 +32,13 @@ class communicate_slideshow:
             time.sleep(t)
             if not get_decode_data:
                 receive = self._port.read(bytes)
+                logging.debug(f"DECODE_CMD_ANSWER: {receive}")
             else:
                 receive = None
             if printio:
                 print(receive.decode())
             if return_data:
-                logging.debug(f"RETURN_CMD: "+str(receive.decode()))
+                logging.debug(f"RETURN_CMD: {receive.decode()}")
                 return receive
 
     def _read_sent_data(self, numberOfBytes):
@@ -51,10 +52,10 @@ class communicate_slideshow:
         self._send_cmd(cmd)
         self._ATcmd()
         # przełączenie na transmisje GPRS
-        cmd = 'AT+SAPBR=3,1, "CONTYPE", "GPRS"'
-        self._send_cmd(cmd)
+        #cmd = 'AT+SAPBR=3,1, "CONTYPE", "GPRS"'
+        #self._send_cmd(cmd)
         # Accest point name - definiuje ścieżkę sieciową dla wszystkich połączeń z siecią komórkową danych
-        cmd = f'AT+SAPBR=3,1, "APN", "{APN}"'
+        cmd = f'AT+SAPBR=3,1,"APN","{APN}"'
         self._send_cmd(cmd)
         # otwiera zawa
         cmd = "AT+SAPBR=1,1"
