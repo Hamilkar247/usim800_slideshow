@@ -52,9 +52,12 @@ class GsmHami:
 
 class GsmSlideshow:
     def __init__(self):
-        self.gsm = sim800_slideshow(baudrate=115200, path="/dev/ttyUSB0")
-        self.gsm.requests._APN = "internet"
-        self.r = None
+        try:
+            self.gsm = sim800_slideshow(baudrate=115200, path="/dev/ttyUSB0")
+            self.gsm.requests._APN = "internet"
+            self.r = None
+        except Exception as e:
+            print("Wystąpił błąd przy próbie otwarcia portu GsmSlideshow - możliwe że inny program używa już podanego portu!")
 
     def download_file(self):
         try:
