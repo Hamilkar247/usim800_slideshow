@@ -63,9 +63,9 @@ class request_slideshow(communicate_slideshow):
         #inicjalizacja połączenia HTTP
         cmd = 'AT+HTTPINIT'
         self._send_cmd(cmd)
-        cmd = 'AT+HTTPPARA="CID", 1'
-        self._send_cmd(cmd)
-        cmd = 'AT+HTTPARA="URL", "{}"'.format(url)
+        #cmd = 'AT+HTTPPARA="CID", 1'
+        #self._send_cmd(cmd)
+        cmd = f'AT+HTTPPARA="URL","{url}"'
         self._send_cmd(cmd)
         time.sleep(3)
         cmd = 'AT+HTTPACTION=0'
