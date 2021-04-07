@@ -57,12 +57,14 @@ class communicate_slideshow:
         # otwiera zawa
         cmd = "AT+SAPBR=1,1"
         self._send_cmd(cmd)
+        #przydziela urządzeniu numer ip
         cmd = "AT+SAPBR=2,1"
         data = self._send_cmd(cmd, return_data=True)
         try:
             IP = data.decode().split()[4].split(",")[-1].replace('"', '')
-        except:
-            print("nie złapało nam IP - zwracam None")
+        except Exception as e:
+            print("wystąpił błąd"+str(e))
+            print("IP ustawione na None")
             IP = None
         return IP
 

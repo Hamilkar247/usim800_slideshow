@@ -69,7 +69,7 @@ class GsmSlideshow:
             with open(nazwa_plika, 'wb') as file:
                 file.write(self.r.content)
         except:
-            print("Niestety jest błąd")
+            print("Niestety jest błąd - wyrzuciło download_file w GsmSlideshow")
         logging.debug("koniec pliku")
 
     def test_print(self):

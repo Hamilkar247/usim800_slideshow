@@ -55,7 +55,10 @@ class request_slideshow(communicate_slideshow):
         logging.debug("Jestem w getFile")
         self.init()
         self._url = url
-        self._IP = self._bearer(self._APN)
+        try:
+          self._IP = self._bearer(self._APN)
+        except Exception as e:
+            print("przy przydzielaniu IP urządzeniu wystąpił błąd")
 
         #inicjalizacja połączenia HTTP
         cmd = 'AT+HTTPINIT'
