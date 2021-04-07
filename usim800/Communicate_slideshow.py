@@ -74,8 +74,8 @@ class communicate_slideshow:
 
     def takeIP(self, data):
         logging.debug("takeIP method")
-        logging.debug(f"start data.decode() {data.decode()}")
-        stringIP=data.decode()
+        logging.debug(f"start data {data}")
+        stringIP=data
         logging.debug(f"{stringIP.split()}")
         logging.debug(f"{stringIP.split()[2]}")
         stringIP = stringIP.split()[2]
