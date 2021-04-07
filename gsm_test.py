@@ -2,6 +2,7 @@ from usim800.usim800 import sim800
 import os
 import json
 import logging
+import re
 
 from usim800.usim800_slideshow import sim800_slideshow
 
@@ -81,6 +82,13 @@ class GsmSlideshow:
         print("json:" + str(self.r.json()))
         print("IP:" + str(self.r.IP))
 
+def parserIPNumber():
+    string='AT+SAPBR=2,1\r\r\n+SAPBR: 1,1,"10.242.37.232"\r\n\r\nOK\r\n'
+    print(string.split())
+    print(string.split()[2])
+    string=string.split()[2]
+    p=re.compile('"(.*)"')
+    print(p.findall(string)[0])
 
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
@@ -89,4 +97,4 @@ if __name__ == "__main__":
 
     gsm_slideshow = GsmSlideshow()
     gsm_slideshow.download_file()
-
+    #parserIPNumber()
