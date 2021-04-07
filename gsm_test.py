@@ -60,17 +60,19 @@ class GsmSlideshow:
         except Exception as e:
             print("Wystąpił błąd przy próbie otwarcia portu GsmSlideshow - możliwe że inny program używa już podanego portu!")
 
-    def download_file(self):
+    def download_file(self, nazwa, url):
         try:
-            nazwa_plika="config.json"
-            file_string=self.gsm.requests.getFile(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+            nazwa_pliku=nazwa
+            file_string=self.gsm.requests.getFile(url)
+            logging.debug("po pobraniu pliku")
+            logging.debug(f"ahjo {file_string}")
             #self.r = self.gsm.requests
             #self.test_print()
-            if os.path.isfile(nazwa_plika):
+            if os.path.isfile(nazwa_pliku):
                 print("uwaga już był plik pobrany")
             else:
-                f = open(nazwa_plika, "w+")
-            with open(nazwa_plika, 'w+') as file:
+                f = open(nazwa_pliku, "w+")
+            with open(nazwa_pliku, 'w+') as file:
                 file.write(file_string)
         except Exception as e:
             print("Niestety jest błąd - wyrzuciło download_file w GsmSlideshow")
@@ -97,5 +99,9 @@ if __name__ == "__main__":
     #gsm_hami.download_config()
 
     gsm_slideshow = GsmSlideshow()
-    gsm_slideshow.download_file()
+    #gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+    gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png")
+    #gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png")
+    #gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/")
+    #gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/")
     #parserIPNumber()
