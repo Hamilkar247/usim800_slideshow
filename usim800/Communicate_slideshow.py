@@ -54,12 +54,12 @@ class communicate_slideshow:
         cmd = 'AT+SAPBR=3,1, "CONTYPE", "GPRS"'
         self._send_cmd(cmd)
         # Accest point name - definiuje ścieżkę sieciową dla wszystkich połączeń z siecią komórkową danych
-        cmd = 'AT+SAPBR=3,1, "APN", "{}'.format(APN)
+        cmd = f'AT+SAPBR=3,1, "APN", "{APN}"'
         self._send_cmd(cmd)
         # otwiera zawa
         cmd = "AT+SAPBR=1,1"
         self._send_cmd(cmd)
-        #przydziela urządzeniu numer ip
+        #zwraca przydzielone IP
         cmd = "AT+SAPBR=2,1"
         data = self._send_cmd(cmd, return_data=True)
         try:
