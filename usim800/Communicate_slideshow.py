@@ -35,11 +35,12 @@ class communicate_slideshow:
                 logging.debug(f"DECODE_CMD_ANSWER: {receive}")
             else:
                 receive = None
+                logging.debug(f"DECODE_CMD_ANSWER: receive is None")
             if printio:
                 print(receive.decode())
             if return_data:
                 logging.debug(f"RETURN_CMD: {receive.decode()}")
-                return receive
+                return receive.decode()
 
     def _read_sent_data(self, numberOfBytes):
         receive = self._port.read(numberOfBytes)

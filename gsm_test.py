@@ -63,17 +63,18 @@ class GsmSlideshow:
     def download_file(self):
         try:
             nazwa_plika="config.json"
-            self.gsm.requests.getFile(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
-            self.r = self.gsm.requests
-            self.test_print()
+            file_string=self.gsm.requests.getFile(url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+            #self.r = self.gsm.requests
+            #self.test_print()
             if os.path.isfile(nazwa_plika):
                 print("uwaga już był plik pobrany")
             else:
                 f = open(nazwa_plika, "w+")
-            with open(nazwa_plika, 'wb') as file:
-                file.write(self.r.content)
-        except:
+            with open(nazwa_plika, 'w+') as file:
+                file.write(file_string)
+        except Exception as e:
             print("Niestety jest błąd - wyrzuciło download_file w GsmSlideshow")
+            print(f"{e}")
         logging.debug("koniec pliku")
 
     def test_print(self):
