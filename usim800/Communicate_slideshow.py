@@ -1,7 +1,7 @@
 import logging
 import serial
 import time
-
+import re
 
 class communicate_slideshow:
     cmd_list = []
@@ -48,8 +48,8 @@ class communicate_slideshow:
     def _bearer(self, APN):  # myśle że chodzi w nazwie o definiowanie nośnej
         logging.debug(f"APN:{APN}")
         self._ATcmd()
-        cmd = "AT+SABR=0,1"  # nie wiem co do końca robi - do weryfikacji
-        self._send_cmd(cmd)
+        #cmd = "AT+SABR=0,1"  # nie wiem co do końca robi - do weryfikacji
+        #self._send_cmd(cmd)
         self._ATcmd()
         # przełączenie na transmisje GPRS
         #cmd = 'AT+SAPBR=3,1, "CONTYPE", "GPRS"'
@@ -64,12 +64,25 @@ class communicate_slideshow:
         cmd = "AT+SAPBR=2,1"
         data = self._send_cmd(cmd, return_data=True)
         try:
-            IP = data.decode().split()[4].split(",")[-1].replace('"', '')
+            logging.debug("przydzielanie IP")
+            IP = self.takeIP(data)
         except Exception as e:
-            print("wystąpił błąd"+str(e))
+            print("wystąpił błąd - nie przydzielono IP"+str(e))
             print("IP ustawione na None")
             IP = None
         return IP
+
+    def takeIP(self, data):
+        logging.debug("takeIP method")
+        logging.debug(f"start data.decode() {data.decode()}")
+        stringIP=data.decode()
+        logging.debug(f"{stringIP.split()}")
+        logging.debug(f"{stringIP.split()[2]}")
+        stringIP = stringIP.split()[2]
+        p = re.compile('"(.*)"')
+        print(p.findall(stringIP)[0])
+        stringIP=p.findall(stringIP)[0]
+        return stringIP
 
     def _getdata(self, data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0):
         logging.debug(f"Communicate_slideshow.py - _getdata")

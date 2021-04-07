@@ -58,7 +58,7 @@ class request_slideshow(communicate_slideshow):
         try:
           self._IP = self._bearer(self._APN)
         except Exception as e:
-            print("przy przydzielaniu IP urządzeniu wystąpił błąd")
+            print(f"przy przydzielaniu IP urządzeniu wystąpił błąd {e}")
 
         #inicjalizacja połączenia HTTP
         cmd = 'AT+HTTPINIT'
