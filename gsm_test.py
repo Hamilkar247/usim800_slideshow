@@ -85,6 +85,7 @@ class GsmSlideshow:
         print("json:" + str(self.r.json()))
         print("IP:" + str(self.r.IP))
 
+
 def parserIPNumber():
     string='AT+SAPBR=2,1\r\r\n+SAPBR: 1,1,"10.242.37.232"\r\n\r\nOK\r\n'
     print(string.split())
@@ -93,15 +94,22 @@ def parserIPNumber():
     p=re.compile('"(.*)"')
     print(p.findall(string)[0])
 
+
+def parserPictureHTTPREAD():
+    bytes=b'AT+HTTPREAD\r\r\n+HTTPREAD: 144\r\n\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\xe1\x00\x00\x00'
+    print(bytes.split(b'144\r\n'))
+
+
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
     #gsm_hami = GsmHami()
     #gsm_hami.download_config()
 
-    gsm_slideshow = GsmSlideshow()
+    #gsm_slideshow = GsmSlideshow()
     #gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
-    gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png")
+    #gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png")
     #gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png")
     #gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/")
     #gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/")
     #parserIPNumber()
+    parserPictureHTTPREAD()
