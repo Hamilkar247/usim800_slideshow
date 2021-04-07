@@ -37,6 +37,7 @@ class communicate_slideshow:
             if printio:
                 print(receive.decode())
             if return_data:
+                logging.debug(f"RETURN_CMD: "+str(receive.decode()))
                 return receive
 
     def _read_sent_data(self, numberOfBytes):
@@ -44,6 +45,7 @@ class communicate_slideshow:
         return receive
 
     def _bearer(self, APN):  # myśle że chodzi w nazwie o definiowanie nośnej
+        logging.debug(f"APN:{APN}")
         self._ATcmd()
         cmd = "AT+SABR=0,1"  # nie wiem co do końca robi - do weryfikacji
         self._send_cmd(cmd)
