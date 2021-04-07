@@ -74,6 +74,7 @@ class request_slideshow(communicate_slideshow):
         cmd = "AT+HTTPREAD"
         text=self._send_cmd(cmd, get_decode_data=False, return_data=True)
         logging.debug(f"ahjo text {text}")
+
         #data = self._getdata(
         #    data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0)
         #tk = ParserFile(data)
