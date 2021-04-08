@@ -3,6 +3,7 @@ import os
 import json
 import logging
 import re
+import pathlib
 
 from usim800.usim800_slideshow import sim800_slideshow
 
@@ -63,9 +64,9 @@ class GsmSlideshow:
     def download_file(self, nazwa, url):
         try:
             nazwa_pliku=nazwa
-            file_string=self.gsm.requests.getFile(url)
+            file_bytes=self.gsm.requests.getFile(url)
             logging.debug("po pobraniu pliku")
-            logging.debug(f"ahjo {file_string}")
+            logging.debug(f"ahjo {file_bytes}")
             #self.r = self.gsm.requests
             #self.test_print()
             if os.path.isfile(nazwa_pliku):
@@ -73,7 +74,7 @@ class GsmSlideshow:
             else:
                 f = open(nazwa_pliku, "wb")
             with open(nazwa_pliku, 'wb') as file:
-                file.write(file_string)
+                file.write(file_bytes)
         except Exception as e:
             print("Niestety jest błąd - wyrzuciło download_file w GsmSlideshow")
             print(f"{e}")
@@ -96,14 +97,12 @@ def parserIPNumber():
 
 
 def parserPictureHTTPREAD():
-    bytes=b'AT+HTTPREAD\r\r\n+HTTPREAD: 144\r\n\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\xe1\x00\x00\x00'
-    print(bytes.split(b'144\r\n'))
-    at_command = bytes.split(b'144\r\n')[0].decode()
-    picture_bytes = bytes.split(b'144\r\n')[1].decode()
-    print(at_command)
-    print(picture_bytes)
-
-
+    with open("ideal_blank.png", "rb") as f:
+        while True:
+            byte = f.read(144)
+            if not byte:
+                break
+            print(byte)
 
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
@@ -112,9 +111,9 @@ if __name__ == "__main__":
 
     gsm_slideshow = GsmSlideshow()
     gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
-    #gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png")
-    #gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png")
-    #gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/")
-    #gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/")
+    gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png")
+    gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png")
+    gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/")
+    gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/")
     #parserIPNumber()
     #parserPictureHTTPREAD()
