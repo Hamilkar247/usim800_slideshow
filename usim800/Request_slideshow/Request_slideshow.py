@@ -69,28 +69,27 @@ class request_slideshow(communicate_slideshow):
         self._send_cmd(cmd)
         time.sleep(3)
         cmd = 'AT+HTTPACTION=0'
-        self._send_cmd(cmd)
+        number_of_bytes=self.readNumberOfBytes(cmd, return_data=True)
 
-        file_bytes=self.receiveHTTTPREAD()
-        print(file_bytes)
-        #self.sendHTTPREAD()
-        #bytes_file=self._send_cmd(cmd, get_decode_data=False, return_data=True)
-        #logging.debug(f"pobrane {bytes_file}")
-        #logging.debug(f"typ {type(bytes_file)}")
-        #bytes_file=bytes_file.decode('UTF-8').split(b'144\r\n')[1] #ucinam odpowiedź AT, i zostawiam sam plik
-        #logging.debug(f"po splicie {bytes_file}")
-        #data = self._getdata(uuuuuu
-        #    data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0)
-        #tk = ParserFile(data)
+        try:
+            cmd = 'AT+HTTPREAD'
+            file_bytes=self.receiveHTTTPREAD(cmd)
+            print(file_bytes)
+        except Exception as e:
+            print("Wystapil blad przy odbieraniu danych")
+            print(f"tresc błędu {e}")
+            file_bytes=None
         return file_bytes
 
-    def receiveHTTTPREAD(self):
+    def readNumberOfBytes(self):
         time.sleep(2)
-        cmd = "AT+HTTPREAD"
+
+    def receiveHTTTPREAD(self, cmd):
+        time.sleep(2)
         bytes_file_and_at_com=self._send_cmd(cmd, get_decode_data=False, return_data=True)
         logging.debug(f"pobrane {bytes_file_and_at_com}")
         logging.debug(f"typ {type(bytes_file_and_at_com)}")
         logging.debug(f"podzielone")
-        logging.debug(bytes_file_and_at_com.split(b'144\r\n'))
-        only_bytes_file=bytes_file_and_at_com.split(b'144\r\n')[1]
+        logging.debug(bytes_file_and_at_com.split(b'2729\r\n'))
+        only_bytes_file=bytes_file_and_at_com.split(b'2729\r\n')[1]
         return only_bytes_file
