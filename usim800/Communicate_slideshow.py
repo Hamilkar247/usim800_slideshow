@@ -33,14 +33,15 @@ class communicate_slideshow:
             if not get_decode_data:
                 receive = self._port.read(bytes)
                 logging.debug(f"DECODE_CMD_ANSWER: {receive}")
+
             else:
                 receive = None
                 logging.debug(f"DECODE_CMD_ANSWER: receive is None")
             if printio:
                 print(receive.decode())
             if return_data:
-                logging.debug(f"RETURN_CMD: {receive.decode()}")
-                return receive.decode()
+                logging.debug(f"RETURN_CMD: {receive}")
+                return receive
 
     def _read_sent_data(self, numberOfBytes):
         receive = self._port.read(numberOfBytes)
@@ -48,7 +49,7 @@ class communicate_slideshow:
 
     def _bearer(self, APN):  # myśle że chodzi w nazwie o definiowanie nośnej
         logging.debug(f"APN:{APN}")
-        self._ATcmd()
+        #self._ATcmd()
         #cmd = "AT+SABR=0,1"  # nie wiem co do końca robi - do weryfikacji
         #self._send_cmd(cmd)
         self._ATcmd()
@@ -63,19 +64,15 @@ class communicate_slideshow:
         self._send_cmd(cmd)
         #zwraca przydzielone IP
         cmd = "AT+SAPBR=2,1"
-        data = self._send_cmd(cmd, return_data=True)
-        try:
-            logging.debug("przydzielanie IP")
-            IP = self.takeIP(data)
-        except Exception as e:
-            print("wystąpił błąd - nie przydzielono IP"+str(e))
-            print("IP ustawione na None")
-            IP = None
+        ip_answer_bytes = self._send_cmd(cmd, return_data=True)
+        logging.debug("przydzielanie IP")
+        IP = self.parserIPNumber(ip_answer_bytes)
         return IP
 
     def takeIP(self, data):
         logging.debug("takeIP method")
         logging.debug(f"start data {data}")
+
         stringIP=data
         logging.debug(f"{stringIP.split()}")
         logging.debug(f"{stringIP.split()[2]}")
@@ -83,7 +80,21 @@ class communicate_slideshow:
         p = re.compile('"(.*)"')
         print(p.findall(stringIP)[0])
         stringIP=p.findall(stringIP)[0]
-        return stringIP
+        print(stringIP)
+        return stringIP.decode()
+
+    def parserIPNumber(self, bytes):
+        logging.debug("parserIPNumber method")
+        logging.debug(f"start data {bytes}")
+        #bytes = b'AT+SAPBR=2,1\r\r\n+SAPBR: 1,1,"10.242.37.232"\r\n\r\nOK\r\n'
+        logging.debug(bytes.split())
+        answerWithIP = bytes.split()[2]
+        logging.debug(f"odpowiedz z czescia zawierajaca ip: {answerWithIP}")
+        ip = answerWithIP.split("\"".encode())[1]  # encode daje to samo co b"\""
+        decode_ip=ip.decode()
+        logging.debug(f"zdekodowane ip (string) {decode_ip}")
+        logging.debug(f"klasa {type(decode_ip)}")
+        return decode_ip
 
     def _getdata(self, data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0):
         logging.debug(f"Communicate_slideshow.py - _getdata")

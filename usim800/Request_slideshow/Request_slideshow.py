@@ -70,12 +70,18 @@ class request_slideshow(communicate_slideshow):
         time.sleep(3)
         cmd = 'AT+HTTPACTION=0'
         self._send_cmd(cmd)
+
+        #self.sendHTTPREAD()
+        bytes_file=self._send_cmd(cmd, get_decode_data=False, return_data=True)
+        logging.debug(f"pobrane {bytes_file}")
+        logging.debug(f"typ {type(bytes_file)}")
+        bytes_file=bytes_file.decode('UTF-8').split(b'144\r\n')[1] #ucinam odpowiedź AT, i zostawiam sam plik
+        logging.debug(f"po splicie {bytes_file}")
+        #data = self._getdata(uuuuuu
+        #    data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0)
+        #tk = ParserFile(data)
+        return bytes_file
+
+    def sendHTTTPREAD(self):
         time.sleep(2)
         cmd = "AT+HTTPREAD"
-        self._send_cmd(cmd, get_decode_data=False)
-        #logging.debug(f"ahjo text {text}")
-
-        data = self._getdata(
-            data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0)
-        #tk = ParserFile(data)
-        return text
