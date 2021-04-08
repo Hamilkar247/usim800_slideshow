@@ -71,8 +71,8 @@ class GsmSlideshow:
             if os.path.isfile(nazwa_pliku):
                 print("uwaga już był plik pobrany")
             else:
-                f = open(nazwa_pliku, "w+")
-            with open(nazwa_pliku, 'w+') as file:
+                f = open(nazwa_pliku, "wb")
+            with open(nazwa_pliku, 'wb') as file:
                 file.write(file_string)
         except Exception as e:
             print("Niestety jest błąd - wyrzuciło download_file w GsmSlideshow")
@@ -87,17 +87,22 @@ class GsmSlideshow:
 
 
 def parserIPNumber():
-    string='AT+SAPBR=2,1\r\r\n+SAPBR: 1,1,"10.242.37.232"\r\n\r\nOK\r\n'
-    print(string.split())
-    print(string.split()[2])
-    string=string.split()[2]
-    p=re.compile('"(.*)"')
-    print(p.findall(string)[0])
+    bytes=b'AT+SAPBR=2,1\r\r\n+SAPBR: 1,1,"10.242.37.232"\r\n\r\nOK\r\n'
+    print(bytes.split())
+    answerWithIP = bytes.split()[2]
+    print(answerWithIP)
+    ip = answerWithIP.split("\"".encode())[1] #encode daje to samo co b"\""
+    print(ip.decode())
 
 
 def parserPictureHTTPREAD():
     bytes=b'AT+HTTPREAD\r\r\n+HTTPREAD: 144\r\n\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\xe1\x00\x00\x00'
     print(bytes.split(b'144\r\n'))
+    at_command = bytes.split(b'144\r\n')[0].decode()
+    picture_bytes = bytes.split(b'144\r\n')[1].decode()
+    print(at_command)
+    print(picture_bytes)
+
 
 
 if __name__ == "__main__":
@@ -105,11 +110,11 @@ if __name__ == "__main__":
     #gsm_hami = GsmHami()
     #gsm_hami.download_config()
 
-    #gsm_slideshow = GsmSlideshow()
-    #gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+    gsm_slideshow = GsmSlideshow()
+    gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
     #gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png")
     #gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png")
     #gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/")
     #gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/")
     #parserIPNumber()
-    parserPictureHTTPREAD()
+    #parserPictureHTTPREAD()
