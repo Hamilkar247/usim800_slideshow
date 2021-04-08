@@ -55,7 +55,7 @@ class GsmHami:
 class GsmSlideshow:
     def __init__(self):
         try:
-            self.gsm = sim800_slideshow(baudrate=115200, path="/dev/ttyUSB0")
+            self.gsm = sim800_slideshow(baudrate=115200, path="/dev/ttyUSB1")
             self.gsm.requests._APN = "internet"
             self.r = None
         except Exception as e:
@@ -111,9 +111,9 @@ if __name__ == "__main__":
 
     gsm_slideshow = GsmSlideshow()
     gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
-    gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png")
-    gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png")
-    gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/")
-    gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/")
+    #gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png")
+    #gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png")
+    #gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/")
+    #gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/")
     #parserIPNumber()
     #parserPictureHTTPREAD()
