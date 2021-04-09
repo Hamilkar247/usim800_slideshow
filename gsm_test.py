@@ -61,10 +61,10 @@ class GsmSlideshow:
         except Exception as e:
             print("Wystąpił błąd przy próbie otwarcia portu GsmSlideshow - możliwe że inny program używa już podanego portu!")
 
-    def download_file(self, nazwa, url, sleep):
+    def download_file(self, nazwa, url, sleep_to_read_bytes):
         try:
             nazwa_pliku=nazwa
-            file_bytes=self.gsm.requests.getFile(url, sleep)
+            file_bytes=self.gsm.requests.getFile(url, sleep_to_read_bytes)
             logging.debug("po pobraniu pliku")
             logging.debug(f"ahjo {file_bytes}")
             #self.r = self.gsm.requests
@@ -131,11 +131,16 @@ if __name__ == "__main__":
     #gsm_hami.download_config()
 
     gsm_slideshow = GsmSlideshow()
-    #gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
-    gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png", sleep=10)
-    #gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png")
-    #gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/")
-    #gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/", 10)
+    gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json"
+                                , sleep_to_read_bytes=2)
+    gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png"
+                                , sleep_to_read_bytes=1)
+    gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png"
+                                , sleep_to_read_bytes=30)
+    #gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/"
+    #                            , sleep_to_read_bytes=30)
+    gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/"
+                                , sleep_to_read_bytes=30)
     #parserIPNumber()
     #parserHTTPACTION()
     #parserPictureHTTPREAD()
