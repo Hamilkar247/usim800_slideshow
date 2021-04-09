@@ -61,10 +61,10 @@ class GsmSlideshow:
         except Exception as e:
             print("Wystąpił błąd przy próbie otwarcia portu GsmSlideshow - możliwe że inny program używa już podanego portu!")
 
-    def download_file(self, nazwa, url):
+    def download_file(self, nazwa, url, sleep):
         try:
             nazwa_pliku=nazwa
-            file_bytes=self.gsm.requests.getFile(url)
+            file_bytes=self.gsm.requests.getFile(url, sleep)
             logging.debug("po pobraniu pliku")
             logging.debug(f"ahjo {file_bytes}")
             #self.r = self.gsm.requests
@@ -96,13 +96,34 @@ def parserIPNumber():
     print(ip.decode())
 
 
+def parserHTTPACTION():
+    answerAT=b'AT+HTTPACTION=0\r\r\nOK\r\n\r\n+HTTPACTION: 0,200,2729\r\n'
+    status=''
+    numberOfBytes=''
+    status_and_number=answerAT.split(b'+HTTPACTION: 0,')[1][0:-2]
+    print(status_and_number)
+    status=str(status_and_number.split(b',')[0])
+    numberOfBytes=str(status_and_number.split(b',')[1])
+    print(status)
+    print(numberOfBytes)
+
+def concatenate_list_data(list):
+    result=b''
+    for element in list:
+        result += element
+    return result
+
 def parserPictureHTTPREAD():
-    with open("ideal_blank.png", "rb") as f:
+    with open("widgetPiaseczno.png", "rb") as f:
+        data=[]
         while True:
-            byte = f.read(144)
+            byte = f.read(1)
             if not byte:
                 break
-            print(byte)
+            data.append(byte)
+            if byte == b'\n':
+                print(concatenate_list_data(data))
+                data.clear()
 
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
@@ -110,10 +131,11 @@ if __name__ == "__main__":
     #gsm_hami.download_config()
 
     gsm_slideshow = GsmSlideshow()
-    gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
-    #gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png")
+    #gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json")
+    gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png", sleep=10)
     #gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png")
     #gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/")
-    #gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/")
+    #gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/", 10)
     #parserIPNumber()
+    #parserHTTPACTION()
     #parserPictureHTTPREAD()
