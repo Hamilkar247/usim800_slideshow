@@ -13,7 +13,7 @@ class request_slideshow(communicate_slideshow):
 
         self._status_code = None
         self._numberOfBytes = None
-        self._sleep = None
+        self._sleep_to_read_bytes = None
         self._json = None
         self._text = None
         self._content = None
@@ -23,7 +23,7 @@ class request_slideshow(communicate_slideshow):
     def init(self):
         self._status_code = None
         self._numberOfBytes = None
-        self._sleep = None
+        self._sleep_to_read_bytes = None
         self._json = None
         self._text = None
         self._content = None
@@ -58,11 +58,11 @@ class request_slideshow(communicate_slideshow):
     def status_code(self):
         return self._status_code
 
-    def getFile(self, url, sleep, header=None):
+    def getFile(self, url, sleep_to_read_bytes, header=None):
         logging.debug("Jestem w getFile")
         self.init()
         self._url = url
-        self._sleep = sleep
+        self._sleep_to_read_bytes = sleep_to_read_bytes
         try:
           self._IP = self._bearer(self._APN)
         except Exception as e:
@@ -90,7 +90,7 @@ class request_slideshow(communicate_slideshow):
         try:
             time.sleep(2)
             cmd = 'AT+HTTPACTION=0'
-            answerAT=self._send_cmd(cmd, get_decode_data=False, return_data=True,t=1)
+            answerAT=self._send_cmd(cmd, get_decode_data=False, return_data=True, t=self._sleep_to_read_bytes)
             time.sleep(2)
             self._status_code = b''
             self._numberOfBytes = b''
@@ -109,7 +109,7 @@ class request_slideshow(communicate_slideshow):
         try:
             time.sleep(1)
             cmd = 'AT+HTTPREAD'
-            bytes_file_and_at_com=self._send_cmd(cmd, get_decode_data=False, return_data=True, t=1)
+            bytes_file_and_at_com=self._send_cmd(cmd, get_decode_data=False, return_data=True, t=self._sleep_to_read_bytes)
             logging.debug(f"pobrane {bytes_file_and_at_com}")
             logging.debug(f"typ {type(bytes_file_and_at_com)}")
             logging.debug(f"podzielone")
