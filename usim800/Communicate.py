@@ -2,6 +2,7 @@ import serial
 import time
 import re
 import json
+import logging
 
 class communicate:
     cmd_list = []
@@ -66,11 +67,13 @@ class communicate:
         return IP
 
     def _getdata(self, data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0):
-
+        logging.debug(f"Communicate.py - _getdata")
         rcv = self._port.read(1)
-
+        #logging.debug(f"rcv:{rcv}")
         if rcv == till:
+         #   logging.debug(f"rcv==till --> {rcv}")
             counter += 1
+         #   logging.debug(f"counter {counter}, count {count}")
             if counter == count:
                 data_to_decode.append(rcv)
                 return b"".join(data_to_decode)
@@ -78,5 +81,25 @@ class communicate:
                 data_to_decode.append(rcv)
                 return self._getdata(data_to_decode, string_to_decode, till, count, counter)
         else:
+         #   logging.debug("rcv!=till")
+            data_to_decode.append(rcv)
+            return self._getdata(data_to_decode, string_to_decode, till, count, counter)
+
+    def _getdataFile(self, data_to_decode=[], string_to_decode=None, till=b'\n', count=2, counter=0):
+        logging.debug(f"Communicate.py - _getdataFile")
+        rcv = self._port.read(1)
+        logging.debug(f"rcv:{rcv}")
+        if rcv == till:
+            logging.debug(f"rcv==till --> {rcv}")
+            counter += 1
+            logging.debug(f"counter {counter}, count {count}")
+            if counter == count:
+                data_to_decode.append(rcv)
+                return b"".join(data_to_decode)
+            else:
+                data_to_decode.append(rcv)
+                return self._getdata(data_to_decode, string_to_decode, till, count, counter)
+        else:
+            logging.debug("rcv!=till")
             data_to_decode.append(rcv)
             return self._getdata(data_to_decode, string_to_decode, till, count, counter)
