@@ -2,10 +2,7 @@ import traceback
 
 from usim800.usim800 import sim800
 import os
-import json
 import logging
-import re
-import pathlib
 
 from usim800.usim800_slideshow import sim800_slideshow
 
@@ -67,15 +64,7 @@ class GsmSlideshow:
     def download_file(self, nazwa, url, sleep_to_read_bytes):
         try:
             nazwa_pliku=nazwa
-            file_bytes=self.gsm.requests.getFile(url, sleep_to_read_bytes)
-            logging.debug("po pobraniu pliku")
-            logging.debug(f"ahjo {file_bytes}")
-            #self.r = self.gsm.requests
-            #self.test_print()
-            if os.path.isfile(nazwa_pliku):
-                print("uwaga już był plik pobrany")
-            with open(nazwa_pliku, 'wb') as file:
-                file.write(file_bytes)
+            self.gsm.requests.getFile(url, sleep_to_read_bytes, nazwa_pliku)
         except Exception as e:
             print("Niestety jest błąd - wyrzuciło download_file w GsmSlideshow")
             print(f"{e}")
@@ -134,13 +123,18 @@ def gsm_config(gsm_slideshow):
                                 , sleep_to_read_bytes=2)
 
 
+def gsm_kozienice(gsm_slideshow):
+    gsm_slideshow.download_file("kozienice_map.png", "https://134.122.69.201/config/kiosk/Lokalne_Kusy/kozienice_map.png"
+                                , sleep_to_read_bytes=40)
+
+
 def gsm_blank(gsm_slideshow):
     gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png"
                                 , sleep_to_read_bytes=1)
 
 
 def gsm_widgetimgurl(gsm_slideshow):
-    gsm_slideshow.download_file("widgetimgurl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png"
+    gsm_slideshow.download_file("pobraneimgurl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png"
                                 , sleep_to_read_bytes=30)
 
 
@@ -159,7 +153,7 @@ if __name__ == "__main__":
 
     gsm_slideshow = GsmSlideshow()
     gsm_config(gsm_slideshow)
-
-    #parserIPNumber()
-    #parserHTTPACTION()
-    #parserPictureHTTPREAD()
+    gsm_blank(gsm_slideshow)
+    gsm_widgetimgurl(gsm_slideshow)
+    gsm_widgetserwer_bezssl(gsm_slideshow)
+    gsm_kozienice(gsm_slideshow)

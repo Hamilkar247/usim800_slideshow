@@ -1,4 +1,7 @@
 import logging
+import os
+import traceback
+
 import serial
 import time
 import re
@@ -43,26 +46,57 @@ class communicate_slideshow:
                 logging.debug(f"RETURN_CMD: {receive}")
                 return receive
 
+    def concatenate_list_data(self, list):
+        result = b''
+        for element in list:
+            result += element
+        return result
+
+    def _send_cmd_and_save_answer(self, cmd, t=1, size=10000
+             , read=True, printio=False, nameSaveFile="default.txt"):
+        cmd = self._setcmd(cmd)
+        self._port.write(cmd.encode())
+        try:
+            if read:
+                self.size=size
+                data=[]
+                if os.path.isfile(nameSaveFile):
+                    print("uwaga nadpisuje obecny plik")
+                with open(nameSaveFile, 'wb') as file:
+                    linia = 0
+                    byte_number = 0
+                    while True:
+                        byte = self._port.read(1)
+                        byte_number = byte_number+1
+                        if not byte:
+                            break
+                        data.append(byte)
+                        if byte_number > 10:
+                            linia=linia+1
+                            saveline = self.concatenate_list_data(data)
+                            file.write(saveline)
+                            print(saveline)
+                            data.clear()
+                            byte_number = 0
+
+        except Exception as e:
+            print("przy zapisie pliku coś poszło nie tak")
+            traceback.print_exc()
+        logging.debug("koniec _send_cmd_and_save_answer")
+
     def _read_sent_data(self, numberOfBytes):
+        logging.debug("_read_send_data method")
         receive = self._port.read(numberOfBytes)
+        logging.debug(f"zapisane {receive}")
         return receive
 
     def _bearer(self, APN):  # myśle że chodzi w nazwie o definiowanie nośnej
         logging.debug(f"APN:{APN}")
-        #self._ATcmd()
-        #cmd = "AT+SABR=0,1"  # nie wiem co do końca robi - do weryfikacji
-        #self._send_cmd(cmd)
         self._ATcmd()
-        # przełączenie na transmisje GPRS
-        #cmd = 'AT+SAPBR=3,1, "CONTYPE", "GPRS"'
-        #self._send_cmd(cmd)
-        # Accest point name - definiuje ścieżkę sieciową dla wszystkich połączeń z siecią komórkową danych
         cmd = f'AT+SAPBR=3,1,"APN","{APN}"'
         self._send_cmd(cmd)
-        # otwiera zawa
         cmd = "AT+SAPBR=1,1"
         self._send_cmd(cmd)
-        #zwraca przydzielone IP
         cmd = "AT+SAPBR=2,1"
         ip_answer_bytes = self._send_cmd(cmd, return_data=True)
         logging.debug("przydzielanie IP")
@@ -86,7 +120,6 @@ class communicate_slideshow:
     def parserIPNumber(self, bytes):
         logging.debug("parserIPNumber method")
         logging.debug(f"start data {bytes}")
-        #bytes = b'AT+SAPBR=2,1\r\r\n+SAPBR: 1,1,"10.242.37.232"\r\n\r\nOK\r\n'
         logging.debug(bytes.split())
         answerWithIP = bytes.split()[2]
         logging.debug(f"odpowiedz z czescia zawierajaca ip: {answerWithIP}")
