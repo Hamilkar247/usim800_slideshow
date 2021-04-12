@@ -1,3 +1,5 @@
+import traceback
+
 from usim800.usim800 import sim800
 import os
 import json
@@ -60,6 +62,7 @@ class GsmSlideshow:
             self.r = None
         except Exception as e:
             print("Wystąpił błąd przy próbie otwarcia portu GsmSlideshow - możliwe że inny program używa już podanego portu!")
+            traceback.print_exc()
 
     def download_file(self, nazwa, url, sleep_to_read_bytes):
         try:
@@ -71,8 +74,6 @@ class GsmSlideshow:
             #self.test_print()
             if os.path.isfile(nazwa_pliku):
                 print("uwaga już był plik pobrany")
-            else:
-                f = open(nazwa_pliku, "wb")
             with open(nazwa_pliku, 'wb') as file:
                 file.write(file_bytes)
         except Exception as e:
@@ -107,11 +108,13 @@ def parserHTTPACTION():
     print(status)
     print(numberOfBytes)
 
+
 def concatenate_list_data(list):
     result=b''
     for element in list:
         result += element
     return result
+
 
 def parserPictureHTTPREAD():
     with open("widgetPiaseczno.png", "rb") as f:
@@ -125,22 +128,38 @@ def parserPictureHTTPREAD():
                 print(concatenate_list_data(data))
                 data.clear()
 
-if __name__ == "__main__":
-    logging.root.setLevel(logging.DEBUG)
-    #gsm_hami = GsmHami()
-    #gsm_hami.download_config()
 
-    gsm_slideshow = GsmSlideshow()
+def gsm_config(gsm_slideshow):
     gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json"
                                 , sleep_to_read_bytes=2)
+
+
+def gsm_blank(gsm_slideshow):
     gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png"
                                 , sleep_to_read_bytes=1)
-    gsm_slideshow.download_file("widgeturl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png"
+
+
+def gsm_widgetimgurl(gsm_slideshow):
+    gsm_slideshow.download_file("widgetimgurl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png"
                                 , sleep_to_read_bytes=30)
-    #gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/"
-    #                            , sleep_to_read_bytes=30)
+
+
+def gsm_widgetserwer_ssl(gsm_slideshow):
+    gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/"
+                                , sleep_to_read_bytes=30)
+
+
+def gsm_widgetserwer_bezssl(gsm_slideshow):
     gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/"
                                 , sleep_to_read_bytes=30)
+
+
+if __name__ == "__main__":
+    logging.root.setLevel(logging.DEBUG)
+
+    gsm_slideshow = GsmSlideshow()
+    gsm_config(gsm_slideshow)
+
     #parserIPNumber()
     #parserHTTPACTION()
     #parserPictureHTTPREAD()
