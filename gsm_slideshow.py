@@ -26,12 +26,6 @@ class GsmSlideshow:
             print(f"{e}")
         logging.debug("koniec pliku")
 
-    def test_print(self):
-        print("statusCode:" + str(self.r.status_code))
-        print("content:" + str(self.r.content))
-        print("json:" + str(self.r.json()))
-        print("IP:" + str(self.r.IP))
-
 
 def gsm_config(gsm_slideshow):
     gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json"
