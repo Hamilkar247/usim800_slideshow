@@ -54,7 +54,7 @@ class GsmHami:
 class GsmSlideshow:
     def __init__(self):
         try:
-            self.gsm = sim800_slideshow(baudrate=115200, path="/dev/ttyUSB1")
+            self.gsm = sim800_slideshow(baudrate=115200, path="/dev/ttyUSB0")
             self.gsm.requests._APN = "internet"
             self.r = None
         except Exception as e:
@@ -150,10 +150,9 @@ def gsm_widgetserwer_bezssl(gsm_slideshow):
 
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
-
     gsm_slideshow = GsmSlideshow()
-    gsm_config(gsm_slideshow)
-    gsm_blank(gsm_slideshow)
-    gsm_widgetimgurl(gsm_slideshow)
+    #gsm_config(gsm_slideshow)
+    #gsm_blank(gsm_slideshow)
+    #gsm_widgetimgurl(gsm_slideshow)
     gsm_widgetserwer_bezssl(gsm_slideshow)
-    gsm_kozienice(gsm_slideshow)
+    #gsm_kozienice(gsm_slideshow)
