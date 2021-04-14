@@ -53,7 +53,7 @@ class communicate_slideshow:
         return result
 
     def _send_cmd_and_save_answer(self, cmd, t=1, size=10000
-             , read=True, printio=False, nameSaveFile="default.txt"):
+             , read=True, printio=False, nameSaveFile="default.txt", byte_line_start=b''):
         cmd = self._setcmd(cmd)
         self._port.write(cmd.encode())
         find_start_line=False
@@ -73,12 +73,12 @@ class communicate_slideshow:
                         data.append(byte)
                         if byte_number > 50 or byte == b'\n':
                             logging.debug(self.concatenate_list_data(data))
-                            if b'\x89PNG\r\n' == self.concatenate_list_data(data):
+                            if byte_line_start == self.concatenate_list_data(data):
                                 logging.debug("wykrylem rozpoczecie pliku")
                                 find_start_line = True
                             #OK\r\n - jest czescia komendy at
                             if find_start_line == True and self.concatenate_list_data(data) != b'OK\r\n':
-                                #logging.debug("wklejam linie")
+                                logging.debug("wklejam linie")
                                 saveline = self.concatenate_list_data(data)
                                 file.write(saveline)
                                 #print(saveline)

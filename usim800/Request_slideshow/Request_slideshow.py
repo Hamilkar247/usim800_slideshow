@@ -22,7 +22,7 @@ class request_slideshow(communicate_slideshow):
         self._url = None
         self._IP = None
         self._png_startFile=b'\x89PNG\r\n'
-        self._startFile=b''
+        self._startFileLine=b''
 
     def init(self):
         self._status_code = None
@@ -36,8 +36,8 @@ class request_slideshow(communicate_slideshow):
         self._url = None
         self._IP = None
         self._png_startFile=b'\x89PNG\r\n'
-        self._json_startFile=b'{\r\n'
-        self._startFile=b''
+        self._json_startFile=b'{\n'
+        self._startFileLine=b''
 
     @property
     def text(self):
@@ -79,6 +79,10 @@ class request_slideshow(communicate_slideshow):
     def extension(self):
         return self._extensionFile
 
+    @property
+    def startFileLine(self):
+        return  self._startFileLine
+
     def getFile(self, url, extension, sleep_to_read_bytes, nameOfFile):
         logging.debug("Jestem w getFile")
         self.init()
@@ -86,10 +90,10 @@ class request_slideshow(communicate_slideshow):
         self._sleep_to_read_bytes = sleep_to_read_bytes
         self._nameOfFile = nameOfFile
         self._extensionFile = extension
-        if self._extensionFile == 'png':
-            self._startFile = self._png_startFile
-        elif self._extensionFile == 'json':
-            self._startFile = self._json_startFile
+        if self._extensionFile == "png":
+            self._startFileLine = self._png_startFile
+        elif self._extensionFile == "json":
+            self._startFileLine = self._json_startFile
         try:
           self._IP = self._bearer(self._APN)
         except Exception as e:
@@ -120,7 +124,7 @@ class request_slideshow(communicate_slideshow):
             status_and_number = answerAT.split(b'+HTTPACTION: 0,')[1][0:-2]
             print(status_and_number)
             if status_and_number == b'AT+HTTPACTION=0\r\r\nOK\r\n':
-                raise Exception(" nie otrzymaliśmy odpowiedzi o statusie ( 200, 603, 602) prawdopodnie za krótki czas oczekiwania")
+                raise Exception(" nie otrzymaliśmy odpowiedzi o statusie ( 200, 603, 602) prawdopodnie za krótki czas oczekiwania na sprawdzenie rozmiaru pliku")
             self._status_code = status_and_number.split(b',')[0]
             self._numberOfBytes = status_and_number.split(b',')[1]
             print(self._status_code)
@@ -137,7 +141,7 @@ class request_slideshow(communicate_slideshow):
             logging.debug(f"receive HTTPREAD")
             cmd = "AT +HTTPREAD"
             self._send_cmd_and_save_answer(cmd, t=self._sleep_to_read_bytes, size=self._numberOfBytes
-                                           , nameSaveFile=self._nameOfFile)
+                                           , nameSaveFile=self._nameOfFile, byte_line_start=self._startFileLine)
         except Exception as e:
             print(f"wystapil blad w receiveHTTPREAD treść {e}")
             traceback.print_exc()
