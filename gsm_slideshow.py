@@ -8,9 +8,9 @@ from usim800.usim800_slideshow import sim800_slideshow
 
 
 class GsmSlideshow:
-    def __init__(self):
+    def __init__(self, path):
         try:
-            self.gsm = sim800_slideshow(baudrate=115200, path="/dev/ttyUSB0")
+            self.gsm = sim800_slideshow(baudrate=115200, path=path)
             self.gsm.requests._APN = "internet"
             self.r = None
         except Exception as e:
@@ -65,7 +65,7 @@ def gsm_widgetserwer_bezssl(gsm_slideshow):
 
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
-    gsm_slideshow = GsmSlideshow()
+    gsm_slideshow = GsmSlideshow(path="/dev/ttyUSB0")
     #gsm_config(gsm_slideshow)
     #gsm_blank(gsm_slideshow)
     #gsm_widgetimgurl(gsm_slideshow)
