@@ -17,10 +17,11 @@ class GsmSlideshow:
             print("Wystąpił błąd przy próbie otwarcia portu GsmSlideshow - możliwe że inny program używa już podanego portu!")
             traceback.print_exc()
 
-    def download_file(self, nazwa, url, sleep_to_read_bytes):
+    def download_file(self, nazwa, extension, url, sleep_to_read_bytes):
         try:
             nazwa_pliku=nazwa
-            self.gsm.requests.getFile(url, sleep_to_read_bytes, nazwa_pliku)
+            self.gsm.requests.getFile(url=url, extension=extension,
+                                      sleep_to_read_bytes=sleep_to_read_bytes, nameOfFile=nazwa_pliku)
         except Exception as e:
             print("Niestety jest błąd - wyrzuciło download_file w GsmSlideshow")
             print(f"{e}")
@@ -28,32 +29,38 @@ class GsmSlideshow:
 
 
 def gsm_config(gsm_slideshow):
-    gsm_slideshow.download_file("config.json", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json"
+    gsm_slideshow.download_file(nazwa="config.json", extension="json"
+                                , url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/gsm_test_config.json"
                                 , sleep_to_read_bytes=2)
 
 
 def gsm_kozienice(gsm_slideshow):
-    gsm_slideshow.download_file("kozienice_map.png", "https://134.122.69.201/config/kiosk/Lokalne_Kusy/kozienice_map.png"
+    gsm_slideshow.download_file(nazwa="kozienice_map.png", extension="png"
+                                , url="https://134.122.69.201/config/kiosk/Lokalne_Kusy/kozienice_map.png"
                                 , sleep_to_read_bytes=40)
 
 
 def gsm_blank(gsm_slideshow):
-    gsm_slideshow.download_file("blank.png", "http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png"
+    gsm_slideshow.download_file(nazwa="blank.png", extension="png"
+                                , url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/blank.png"
                                 , sleep_to_read_bytes=1)
 
 
 def gsm_widgetimgurl(gsm_slideshow):
-    gsm_slideshow.download_file("pobraneimgurl.png", "http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png"
+    gsm_slideshow.download_file(nazwa="pobraneimgurl.png", extension="png"
+                                , url="http://imgurl.pl/img2/widgetkozienice_6065b42f78c5f.png"
                                 , sleep_to_read_bytes=30)
 
 
 def gsm_widgetserwer_ssl(gsm_slideshow):
-    gsm_slideshow.download_file("widgetserwer-ssl.png", "https://134.122.69.201/widgetKozienice/"
+    gsm_slideshow.download_file(nazwa="widgetserwer-ssl.png", extension="png"
+                                , url="https://134.122.69.201/widgetKozienice/"
                                 , sleep_to_read_bytes=30)
 
 
 def gsm_widgetserwer_bezssl(gsm_slideshow):
-    gsm_slideshow.download_file("widgetserwer-bezssl.png", "http://134.122.69.201/widgetKozienice/"
+    gsm_slideshow.download_file(nazwa="widgetserwer-bezssl.png", extension="png"
+                                , url="http://134.122.69.201/widgetKozienice/"
                                 , sleep_to_read_bytes=30)
 
 
