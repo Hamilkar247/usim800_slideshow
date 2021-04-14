@@ -56,6 +56,7 @@ class communicate_slideshow:
              , read=True, printio=False, nameSaveFile="default.txt"):
         cmd = self._setcmd(cmd)
         self._port.write(cmd.encode())
+        find_start_line=False
         try:
             if read:
                 self.size=size
@@ -63,7 +64,6 @@ class communicate_slideshow:
                 if os.path.isfile(nameSaveFile):
                     print("uwaga nadpisuje obecny plik")
                 with open(nameSaveFile, 'wb') as file:
-                    linia = 0
                     byte_number = 0
                     while True:
                         byte = self._port.read(1)
@@ -71,14 +71,19 @@ class communicate_slideshow:
                         if not byte:
                             break
                         data.append(byte)
-                        if byte_number > 10:
-                            linia=linia+1
-                            saveline = self.concatenate_list_data(data)
-                            file.write(saveline)
-                            print(saveline)
+                        if byte_number > 50 or byte == b'\n':
+                            logging.debug(self.concatenate_list_data(data))
+                            if b'\x89PNG\r\n' == self.concatenate_list_data(data):
+                                logging.debug("wykrylem rozpoczecie pliku")
+                                find_start_line = True
+                            #OK\r\n - jest czescia komendy at
+                            if find_start_line == True and self.concatenate_list_data(data) != b'OK\r\n':
+                                #logging.debug("wklejam linie")
+                                saveline = self.concatenate_list_data(data)
+                                file.write(saveline)
+                                #print(saveline)
                             data.clear()
                             byte_number = 0
-
         except Exception as e:
             print("przy zapisie pliku coś poszło nie tak")
             traceback.print_exc()
