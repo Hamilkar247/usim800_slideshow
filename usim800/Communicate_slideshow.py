@@ -81,7 +81,7 @@ class communicate_slideshow:
                                 logging.debug("wklejam linie")
                                 saveline = self.concatenate_list_data(data)
                                 file.write(saveline)
-                                #print(saveline)
+                                print(saveline)
                             data.clear()
                             byte_number = 0
         except Exception as e:

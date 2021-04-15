@@ -34,6 +34,12 @@ def gsm_config(gsm_slideshow):
                                 , sleep_to_read_bytes=2)
 
 
+def gsm_config_lokalne(gsm_slideshow):
+    gsm_slideshow.download_file(nazwa="config.json", extension="json"
+                                , url="http://134.122.69.201/config/kiosk/Lokalne_Kusy/config.json"
+                                , sleep_to_read_bytes=2)
+
+
 def gsm_kozienice(gsm_slideshow):
     gsm_slideshow.download_file(nazwa="kozienice_map.png", extension="png"
                                 , url="https://134.122.69.201/config/kiosk/Lokalne_Kusy/kozienice_map.png"
@@ -67,9 +73,10 @@ def gsm_widgetserwer_bezssl(gsm_slideshow):
 if __name__ == "__main__":
     logging.root.setLevel(logging.DEBUG)
     gsm_slideshow = GsmSlideshow(path="/dev/ttyUSB0")
-    gsm_config(gsm_slideshow)
-    gsm_blank(gsm_slideshow)
-    gsm_widgetimgurl(gsm_slideshow)
-    gsm_widgetserwer_bezssl(gsm_slideshow)
-    gsm_kozienice(gsm_slideshow)
+    #gsm_config(gsm_slideshow)
+    gsm_config_lokalne(gsm_slideshow)
+    #gsm_blank(gsm_slideshow)
+    #gsm_widgetimgurl(gsm_slideshow)
+    #gsm_widgetserwer_bezssl(gsm_slideshow)
+    #gsm_kozienice(gsm_slideshow)
 
