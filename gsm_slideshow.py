@@ -1,10 +1,6 @@
 import traceback
-
-from usim800.usim800_slideshow import sim800_slideshow
-import os
 import logging
-
-from usim800.usim800_slideshow import sim800_slideshow
+from usim800_slideshow.usim800 import sim800_slideshow
 
 
 class GsmSlideshow:

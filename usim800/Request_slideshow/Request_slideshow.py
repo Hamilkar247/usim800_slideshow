@@ -1,7 +1,6 @@
-import sys
 import traceback
 
-from usim800.Communicate_slideshow import communicate_slideshow
+from usim800_slideshow.usim800.Communicate_slideshow import communicate_slideshow
 import logging
 import time
 
