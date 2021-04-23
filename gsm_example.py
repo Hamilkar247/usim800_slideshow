@@ -1,10 +1,8 @@
 import traceback
 
-from usim800.usim800 import sim800
 import os
 import logging
 
-from usim800.usim800_slideshow import sim800_slideshow
 
 
 class GsmHami:
