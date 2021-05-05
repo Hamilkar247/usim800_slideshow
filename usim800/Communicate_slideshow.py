@@ -6,6 +6,7 @@ import serial
 import time
 import re
 
+
 class communicate_slideshow:
     cmd_list = []
 
@@ -30,20 +31,21 @@ class communicate_slideshow:
     def _send_cmd(self, cmd, t=1, bytes=14816, return_data=False, printio=False
                   , get_decode_data=False, read=True):
         cmd = self._setcmd(cmd)
+        print("KOMENDA: "+ str(cmd))
         self._port.write(cmd.encode())
         if read:
             time.sleep(t)
             if not get_decode_data:
                 receive = self._port.read(bytes)
-                logging.debug(f"DECODE_CMD_ANSWER: {receive}")
+                print(f"DECODE_CMD_ANSWER: {receive}")
 
             else:
                 receive = None
-                logging.debug(f"DECODE_CMD_ANSWER: receive is None")
+                print(f"DECODE_CMD_ANSWER: receive is None")
             if printio:
                 print(receive.decode())
             if return_data:
-                logging.debug(f"RETURN_CMD: {receive}")
+                print(f"RETURN_CMD: {receive}")
                 return receive
 
     def concatenate_list_data(self, list):
@@ -98,8 +100,15 @@ class communicate_slideshow:
     def _bearer(self, APN):  # myśle że chodzi w nazwie o definiowanie nośnej
         logging.debug(f"APN:{APN}")
         self._ATcmd()
+
+        cmd = f'AT+SAPBR=3,1,"Contype","GPRS"'
+        self._send_cmd(cmd, return_data=True)
+        cmd = f'AT+SAPBR=3,1,"USER","{APN}"'
+        self._send_cmd(cmd, return_data=True)
+        cmd = f'AT+SAPBR=3,1,"PWD","{APN}"'
+        self._send_cmd(cmd, return_data=True)
         cmd = f'AT+SAPBR=3,1,"APN","{APN}"'
-        self._send_cmd(cmd)
+        self._send_cmd(cmd, return_data=True)
         cmd = "AT+SAPBR=1,1"
         self._send_cmd(cmd)
         cmd = "AT+SAPBR=2,1"
