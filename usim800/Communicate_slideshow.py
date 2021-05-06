@@ -45,7 +45,7 @@ class communicate_slideshow:
             if printio:
                 print(receive.decode())
             if return_data:
-                print(f"RETURN_CMD: {receive}")
+                print(f"RETURN_CMD: {receive}\n")
                 return receive
 
     def concatenate_list_data(self, list):
