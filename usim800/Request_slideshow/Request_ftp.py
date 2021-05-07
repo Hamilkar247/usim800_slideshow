@@ -74,14 +74,18 @@ class request_ftp(communicate_slideshow):
             print(f"przy podlaczaniu do FTP wystapil blad {e}")
             traceback.print_exc()
 
-        cmd = f"AT+FTPLIST=2,0"
-        #inicjalizacja pobrania listy metadanych plikow
-        cmd = f"AT+FTPLIST=1"
-        self._send_cmd(cmd, return_data=True, t=1)
-        cmd = f"AT+FTPLIST=2,1024"
-        files_metadane=self._send_cmd(cmd, return_data=True, t=1)
-        #print(files_metadane)
-        return files_metadane
+        try:
+            #cmd = f"AT+FTPLIST=2,0"
+            #####inicjalizacja pobrania listy metadanych plikow
+            cmd = f"AT+FTPLIST=1"
+            self._send_cmd(cmd, return_data=True, t=3)
+            cmd = f"AT+FTPLIST=2,1024"
+            files_metadane=self._send_cmd(cmd, return_data=True, t=1)
+            #print(files_metadane)
+            return files_metadane
+        except Exception as e:
+            print(f"przy probie sprawdzanie metadanych plików na serwerze FTP wystąpił błąd ")
+            traceback.print_exc()
 
     def getFile(self, APN, server_ip, port, mode,
                  get_name_file, get_path_file, nickname, password):
