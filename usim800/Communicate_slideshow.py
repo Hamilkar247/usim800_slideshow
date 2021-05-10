@@ -31,7 +31,7 @@ class communicate_slideshow:
     def _send_cmd(self, cmd, t=1, bytes=14816, return_data=False, printio=False
                   , get_decode_data=False, read=True):
         cmd = self._setcmd(cmd)
-        print("KOMENDA: "+ str(cmd))
+        print("KOMENDA: " + str(cmd))
         self._port.write(cmd.encode())
         if read:
             time.sleep(t)
@@ -54,38 +54,47 @@ class communicate_slideshow:
             result += element
         return result
 
-    def _send_cmd_and_save_answer(self, cmd, t=1, size=10000
-             , read=True, printio=False, nameSaveFile="default.txt", byte_line_start=b''):
+    def _send_cmd_and_save_answer(self, cmd, t=1, size=10000,
+                                  read=True, return_data=True, printio=False, nameSaveFile="default.txt", byte_line_start=b''):
+        print(f"SIZE {size}")
         cmd = self._setcmd(cmd)
+        print("KOMENDA: " + str(cmd))
         self._port.write(cmd.encode())
-        find_start_line=False
+        find_start_line = False
         try:
             if read:
-                self.size=size
-                data=[]
+                data = []
                 if os.path.isfile(nameSaveFile):
                     print("uwaga nadpisuje obecny plik")
                 with open(nameSaveFile, 'wb') as file:
                     byte_number = 0
                     while True:
+                        #print("z")
                         byte = self._port.read(1)
-                        byte_number = byte_number+1
+                        #print(byte)
+                        byte_number = byte_number + 1
                         if not byte:
                             break
                         data.append(byte)
+                        #print(data)
                         if byte_number > 50 or byte == b'\n':
-                            logging.debug(self.concatenate_list_data(data))
+                            print("ahoj")
+                            print(self.concatenate_list_data(data))
                             if byte_line_start == self.concatenate_list_data(data):
-                                logging.debug("wykrylem rozpoczecie pliku")
+                                print("wykrylem rozpoczecie pliku")
                                 find_start_line = True
-                            #OK\r\n - jest czescia komendy at
+                            # OK\r\n - jest czescia komendy at
                             if find_start_line == True and self.concatenate_list_data(data) != b'OK\r\n':
-                                logging.debug("wklejam linie")
+                                print("wklejam linie")
                                 saveline = self.concatenate_list_data(data)
                                 file.write(saveline)
                                 print(saveline)
                             data.clear()
                             byte_number = 0
+                        #else:
+                        #    print(f"RETURN_CMD: {data}\n")
+                            #return data
+                    return data
         except Exception as e:
             print("przy zapisie pliku coś poszło nie tak")
             traceback.print_exc()
@@ -121,13 +130,13 @@ class communicate_slideshow:
         logging.debug("takeIP method")
         logging.debug(f"start data {data}")
 
-        stringIP=data
+        stringIP = data
         logging.debug(f"{stringIP.split()}")
         logging.debug(f"{stringIP.split()[2]}")
         stringIP = stringIP.split()[2]
         p = re.compile('"(.*)"')
         print(p.findall(stringIP)[0])
-        stringIP=p.findall(stringIP)[0]
+        stringIP = p.findall(stringIP)[0]
         print(stringIP)
         return stringIP.decode()
 
@@ -138,7 +147,7 @@ class communicate_slideshow:
         answerWithIP = bytes.split()[2]
         logging.debug(f"odpowiedz z czescia zawierajaca ip: {answerWithIP}")
         ip = answerWithIP.split("\"".encode())[1]  # encode daje to samo co b"\""
-        decode_ip=ip.decode()
+        decode_ip = ip.decode()
         logging.debug(f"zdekodowane ip (string) {decode_ip}")
         logging.debug(f"klasa {type(decode_ip)}")
         return decode_ip
