@@ -21,9 +21,15 @@ class request_ftp(communicate_slideshow):
         self._ftp_put_name_file = None
         self._ftp_put_path_file = None
         self._ftp_text_to_post = None
+        self._sleep_to_read_bytes = None
+        self._extensionFile = None
+        self._startFileLine= None
+        self._png_startFile=b'\x89PNG\r\n'
+        self._json_startFile=b'{\n'
         self._APN = None
         self._status_code = None
         self._numberOfBytes = None
+        self._IP = None
 
     def init(self):
         pass
@@ -52,7 +58,8 @@ class request_ftp(communicate_slideshow):
 
         #nadanie IP
         self._IP = self.polaczenie_z_siecia_i_nadania_ip()
-
+        if self._IP is None or self._IP == b'':
+            return False
         # inicjalizacja polaczenia FTP
 
         try:
@@ -88,8 +95,18 @@ class request_ftp(communicate_slideshow):
             traceback.print_exc()
 
     def getFile(self, APN, server_ip, port, mode,
-                 get_name_file, get_path_file, nickname, password):
+                numberOfBytes,
+                extension, sleep_to_read_bytes,
+                get_name_file, get_path_file, nickname, password):
         logging.debug("jest w getFile")
+        self.init()
+        self._extensionFile = extension
+        self._numberOfBytes = numberOfBytes
+        if self._extensionFile == "png":
+            self._startFileLine = self._png_startFile
+        elif self._extensionFile == "json":
+            self._startFileLine = self._json_startFile
+        self._sleep_to_read_bytes = sleep_to_read_bytes
         self._ftp_server_ip = server_ip
         self._ftp_port = port
         self._ftp_mode = mode
@@ -101,6 +118,8 @@ class request_ftp(communicate_slideshow):
 
         #nadanie IP
         self._IP = self.polaczenie_z_siecia_i_nadania_ip()
+        if self._IP is None or self._IP == b'':
+            return False
 
         # inicjalizacja polaczenia FTP
         try:
@@ -125,14 +144,21 @@ class request_ftp(communicate_slideshow):
             traceback.print_exc()
 
         try:
+            cmd = "AT+SAPBR=2,1"
+            self._send_cmd(cmd, return_data=True)
+            cmd = f"AT+FTPSCONT?"
+            self._send_cmd(cmd, return_data=True)
             #cmd = f"AT+FTPQUIT"
             #self._send_cmd(cmd, return_data=True, t=1)
             cmd = f"AT+FTPGET=1"
-            ahoj=self._send_cmd(cmd, get_decode_data=False, return_data=True, t=3)
+            ahoj=self._send_cmd(cmd, get_decode_data=False, return_data=True, t=self._sleep_to_read_bytes)
             #print(ahoj)
             #self.parserFTPEXTGET_file()
-            cmd = f'AT+FTPGET=2,1024'#{self._ftp_get_name_file}"'
-            self._send_cmd(cmd, return_data=True, t=20)
+            cmd = f'AT+FTPGET=2,{self._numberOfBytes}'
+            print(f"numberOfBytes: {numberOfBytes} {self._numberOfBytes}")
+            self._send_cmd_and_save_answer(cmd, size=self._numberOfBytes,
+                                           nameSaveFile=self._ftp_get_name_file, return_data=True,
+                                           byte_line_start=self._startFileLine, read=True)
             #cmd = f'AT+FTPGET=3,100'
             #self._send_cmd(cmd, return_data=True)
 
