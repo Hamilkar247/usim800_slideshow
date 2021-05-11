@@ -1,3 +1,4 @@
+import os
 import sys
 import traceback
 
@@ -96,11 +97,11 @@ class request_ftp(communicate_slideshow):
 
     def getFile(self, APN, server_ip, port, mode,
                 numberOfBytes,
-                extension, sleep_to_read_bytes,
+                typ_pliku, sleep_to_read_bytes,
                 get_name_file, get_path_file, nickname, password):
         logging.debug("jest w getFile")
         self.init()
-        self._extensionFile = extension
+        #self._extensionFile = extension
         self._numberOfBytes = numberOfBytes
         if self._extensionFile == "png":
             self._startFileLine = self._png_startFile
@@ -148,17 +149,33 @@ class request_ftp(communicate_slideshow):
             self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPSCONT?"
             self._send_cmd(cmd, return_data=True)
-            #cmd = f"AT+FTPQUIT"
-            #self._send_cmd(cmd, return_data=True, t=1)
+            cmd = f"AT+FTPQUIT"
+            self._send_cmd(cmd, return_data=True, t=1)
             cmd = f"AT+FTPGET=1"
             ahoj=self._send_cmd(cmd, get_decode_data=False, return_data=True, t=self._sleep_to_read_bytes)
             #print(ahoj)
             #self.parserFTPEXTGET_file()
-            cmd = f'AT+FTPGET=2,{self._numberOfBytes}'
-            print(f"numberOfBytes: {numberOfBytes} {self._numberOfBytes}")
-            self._send_cmd_and_save_answer(cmd, size=self._numberOfBytes,
-                                           nameSaveFile=self._ftp_get_name_file, return_data=True,
-                                           byte_line_start=self._startFileLine, read=True)
+            liczba_bitow=self._numberOfBytes + 100000
+            os.remove(self._ftp_get_name_file)
+            print(f"ahoj nameSaveFile {self._ftp_get_name_file}")
+            number = 0
+            flaga_przerwij=False
+            while(liczba_bitow>0 and flaga_przerwij==False and number < 3):
+                print(f"liczba bitow:{liczba_bitow}")
+                if liczba_bitow>1024:
+                    cmd = f'AT+FTPGET=2,{1024}'
+                    print(f"wczytano liczbe bitow: {1024}")
+                    flaga_przerwij=self._send_cmd_and_save_answer(cmd, size=1024, typ_pliku=typ_pliku,
+                                                   nameSaveFile=self._ftp_get_name_file, return_data=True,
+                                                   byte_line_start=self._startFileLine, read=True)
+                    number = number+1
+                else:
+                    cmd = f'AT+FTPGET=2,{liczba_bitow}'
+                    flaga_przerwij=self._send_cmd_and_save_answer(cmd, size=liczba_bitow, typ_pliku=typ_pliku,
+                                                   nameSaveFile=self._ftp_get_name_file, return_data=True,
+                                                   byte_line_start=self._startFileLine, read=True)
+                liczba_bitow = liczba_bitow - 1024
+            print(f"liczba bitow {liczba_bitow}")
             #cmd = f'AT+FTPGET=3,100'
             #self._send_cmd(cmd, return_data=True)
 
