@@ -1,6 +1,7 @@
 import logging
 import os
 import traceback
+from pprint import pprint
 
 import serial
 import time
@@ -54,24 +55,23 @@ class communicate_slideshow:
             result += element
         return result
 
-    def _send_cmd_and_save_answer(self, cmd, t=1, size=10000,
+    def _send_cmd_and_save_answer(self, cmd, t=1, size=10000, typ_pliku="bitowy",
                                   read=True, return_data=True, printio=False, nameSaveFile="default.txt", byte_line_start=b''):
         print(f"SIZE {size}")
         cmd = self._setcmd(cmd)
         print("KOMENDA: " + str(cmd))
         self._port.write(cmd.encode())
         find_start_line = False
+        text = b''
         try:
             if read:
                 data = []
                 if os.path.isfile(nameSaveFile):
                     print("uwaga nadpisuje obecny plik")
-                with open(nameSaveFile, 'wb') as file:
-                    byte_number = 0
+                with open(nameSaveFile, 'ab+') as file:
                     while True:
-                        #print("z")
+                        byte_number = 0
                         byte = self._port.read(1)
-                        #print(byte)
                         byte_number = byte_number + 1
                         if not byte:
                             break
@@ -80,21 +80,75 @@ class communicate_slideshow:
                         if byte_number > 50 or byte == b'\n':
                             print("ahoj")
                             print(self.concatenate_list_data(data))
-                            if byte_line_start == self.concatenate_list_data(data):
-                                print("wykrylem rozpoczecie pliku")
-                                find_start_line = True
-                            # OK\r\n - jest czescia komendy at
-                            if find_start_line == True and self.concatenate_list_data(data) != b'OK\r\n':
-                                print("wklejam linie")
-                                saveline = self.concatenate_list_data(data)
+                            saveline = self.concatenate_list_data(data)
+
+                            if True:#saveline != b'AT+FTPGET=2,1024\r\r\n' \
+                                   #and saveline != b'+FTPGET: 2,1024\r\n' \
+                                   #and saveline != b'OK\r\n' \
+                                   #and saveline != b'AT+FTPGET=2,'+str.encode(str(size))+b'\r\r\n' \
+                                   #and saveline != b'+FTPGET: 2,'+str.encode(str(size))+b'\r\n' \
+                                   #and saveline != b'+FTPGET: 2,0\r\n':
+                                #print("wklejam linie")
+                                if typ_pliku=="tekstowy":
+                                    print("tekstowy!")
+                                    saveline=saveline.replace(b'\r\n', b'')
                                 file.write(saveline)
                                 print(saveline)
+                            if saveline == b'+FTPGET: 2,0\r\n':
+                                print("wystapil +FTPGET: 2,0")
+                                return True
+                            else:
+                                print(f"nie wkleiłem: {saveline}")
                             data.clear()
                             byte_number = 0
+                    return False
+
+                    #print(bytes)
+                    #lines = []
+                    #lines = bytes.split(b'\n')
+                    #pprint(lines)
+                    #for number in range(len(lines)-1):
+                    #    if lines[number] != b'AT+FTPGET=2,1024\r\r' \
+                    #        and lines[number] != b'+FTPGET: 2,1024\r' \
+                    #        and lines[number] != b'OK\r':
+                    #        # and lines[number] != b'AT+FTPGET=2,'+str.encode(str(size))+b'\r\r' \
+                    #        file.write(lines[number]+b'\n')
+
+                        #elif lines[number] != b'+FTPGET: 2,0\r':
+                        #    print(f"uwaga {lines[number]}")
+                        #    and lines[number] != b'ERROR\r':
+                        #    break
+                        #else:
+                        #    print(f"nie drukuje {lines[number]}")
+                    #file.write(bytes)
+
+                    #while True:
+                    #    #print("z")
+                    #    byte = self._port.read(1)
+                    #    #print(byte)
+                    #    byte_number = byte_number + 1
+                    #    if not byte:
+                    #        break
+                    #    data.append(byte)
+                    #    #print(data)
+                    #    if byte_number > 50 or byte == b'\n':
+                    #        print("ahoj")
+                    #        print(self.concatenate_list_data(data))
+                    #        if byte_line_start == self.concatenate_list_data(data):
+                    #            print("wykrylem rozpoczecie pliku")
+                    #            find_start_line = True
+                    #        # OK\r\n - jest czescia komendy at
+                    #        if find_start_line == True and self.concatenate_list_data(data) != b'OK\r\n':
+                    #            print("wklejam linie")
+                    #            saveline = self.concatenate_list_data(data)
+                    #            file.write(saveline)
+                    #            print(saveline)
+                    #        data.clear()
+                    #        byte_number = 0
                         #else:
                         #    print(f"RETURN_CMD: {data}\n")
                             #return data
-                    return data
+                return data
         except Exception as e:
             print("przy zapisie pliku coś poszło nie tak")
             traceback.print_exc()
