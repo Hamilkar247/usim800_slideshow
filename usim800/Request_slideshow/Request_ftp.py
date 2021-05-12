@@ -155,19 +155,22 @@ class request_ftp(communicate_slideshow):
             ahoj=self._send_cmd(cmd, get_decode_data=False, return_data=True, t=self._sleep_to_read_bytes)
             #print(ahoj)
             #self.parserFTPEXTGET_file()
-            liczba_bitow=self._numberOfBytes + 100000
-            os.remove(self._ftp_get_name_file)
+            liczba_bitow=self._numberOfBytes
+            if os.path.isfile(self._ftp_get_name_file):
+                os.remove(self._ftp_get_name_file)
             print(f"ahoj nameSaveFile {self._ftp_get_name_file}")
             number = 0
             flaga_przerwij=False
-            while(liczba_bitow>0 and flaga_przerwij==False and number < 3):
-                print(f"liczba bitow:{liczba_bitow}")
-                if liczba_bitow>1024:
+            #cmd = f'AT+FTPGET=2,{1024}'
+            #self._send_cmd(cmd, get_decode_data=False, return_data=True, t=self._sleep_to_read_bytes)
+            #self._send_cmd(cmd, get_decode_data=False, return_data=True, )
+            while(liczba_bitow>0 and flaga_przerwij==False):# and number < 5):  #      print(f"liczba bitow:{liczba_bitow}")
+                if liczba_bitow > 1024:
                     cmd = f'AT+FTPGET=2,{1024}'
                     print(f"wczytano liczbe bitow: {1024}")
                     flaga_przerwij=self._send_cmd_and_save_answer(cmd, size=1024, typ_pliku=typ_pliku,
-                                                   nameSaveFile=self._ftp_get_name_file, return_data=True,
-                                                   byte_line_start=self._startFileLine, read=True)
+                                                 nameSaveFile=self._ftp_get_name_file, return_data=True,
+                                                 byte_line_start=self._startFileLine, read=True)
                     number = number+1
                 else:
                     cmd = f'AT+FTPGET=2,{liczba_bitow}'
@@ -178,10 +181,10 @@ class request_ftp(communicate_slideshow):
             print(f"liczba bitow {liczba_bitow}")
             #cmd = f'AT+FTPGET=3,100'
             #self._send_cmd(cmd, return_data=True)
-
         except Exception as e:
             print("Niestety - nie udało się pobrać pliku z serwera ftp")
             print(f"{e}")
+            traceback.print_exc()
             return False
         logging.debug("koniec pliku")
         return True
