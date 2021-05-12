@@ -55,8 +55,6 @@ class communicate_slideshow:
         cmd = self._setcmd(cmd)
         print("KOMENDA: " + str(cmd))
         self._port.write(cmd.encode())
-        find_start_line = False
-        text = b''
         if read:
             if os.path.isfile(nameSaveFile):
                 pass
@@ -66,15 +64,15 @@ class communicate_slideshow:
             print(bytes)
             if bytes.find(b'ERROR\r\n') > -1:
                 print(bytes)
-                return True
+                return 'blad'
             if bytes.find(b'FTPGET: 2,0') > -1:
                 print("brak bajtow do pobrania")
-                return True
+                return 'koniec'
             bytes = re.sub(b'AT\+FTPGET=2,\d+\r\r\n\+FTPGET: 2,\d+\r\n', b'', bytes)
             bytes=bytes.replace(b'\r\nOK\r\n', b'')
             with open(nameSaveFile, 'ab+') as file:
                 file.write(bytes)
-            return False
+            return 'trwa'
         logging.debug("koniec _send_cmd_and_save_answer")
 
     def _read_sent_data(self, numberOfBytes):
