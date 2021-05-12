@@ -51,9 +51,47 @@ class communicate_slideshow:
 
     def concatenate_list_data(self, list):
         result = b''
+        liczba_elementow=len(list)
+        number = 0
         for element in list:
-            result += element
+            if number < liczba_elementow-1 and element != b'':
+                result += element + b''
+            else:
+                result += element + b''
+            number = number + 1
         return result
+
+    def split_data(self, s):
+        data = []
+        data2 = []
+        data.extend(s.split(b'\r\r\n'))
+        print("data - \r\r\n")
+        pprint(data)
+        for element in data:
+            data2.extend(element.split(b'\r\n'))
+        print("data2 \r\n")
+        pprint(data2)
+        return data2
+
+    def delete_redundant_line(self, list, nameSaveFile):
+        data=[]
+        for element in list:
+            #if element.find(b'\x89PNG'):
+            #    data.append(element+b"\r\n")
+            if element.find(b'FTPGET') == -1 and element.find(b'OK') == -1 and element != b'':
+                data.append(element+b"")
+                #print(data)
+            else:
+                pass
+                #print("nie wklejam:")
+                #print(f"element.find(b'FTPGET') > -1 {element.find(b'FTPGET')>-1}")
+                #print(f"element.find(b'OK')>-1  {element.find(b'OK')>-1}")
+                #print(f"moze pusty string? {element != b''}")
+                #print(element)
+        #print("koncowa tablica")
+        #pprint(data)
+        with open(nameSaveFile, 'ab+') as file:
+            file.write(self.concatenate_list_data(data))
 
     def _send_cmd_and_save_answer(self, cmd, t=1, size=10000, typ_pliku="bitowy",
                                   read=True, return_data=True, printio=False, nameSaveFile="default.txt", byte_line_start=b''):
@@ -63,96 +101,41 @@ class communicate_slideshow:
         self._port.write(cmd.encode())
         find_start_line = False
         text = b''
-        try:
-            if read:
-                data = []
-                if os.path.isfile(nameSaveFile):
-                    print("uwaga nadpisuje obecny plik")
-                with open(nameSaveFile, 'ab+') as file:
-                    while True:
-                        byte_number = 0
-                        byte = self._port.read(1)
-                        byte_number = byte_number + 1
-                        if not byte:
-                            break
-                        data.append(byte)
-                        #print(data)
-                        if byte_number > 50 or byte == b'\n':
-                            print("ahoj")
-                            print(self.concatenate_list_data(data))
-                            saveline = self.concatenate_list_data(data)
+        #try:
+        if read:
+            to_file = []
+            data = []
+            if os.path.isfile(nameSaveFile):
+                pass
+                #print("uwaga nadpisuje obecny plik")
+            #with open(nameSaveFile, 'ab+') as file:
 
-                            if True:#saveline != b'AT+FTPGET=2,1024\r\r\n' \
-                                   #and saveline != b'+FTPGET: 2,1024\r\n' \
-                                   #and saveline != b'OK\r\n' \
-                                   #and saveline != b'AT+FTPGET=2,'+str.encode(str(size))+b'\r\r\n' \
-                                   #and saveline != b'+FTPGET: 2,'+str.encode(str(size))+b'\r\n' \
-                                   #and saveline != b'+FTPGET: 2,0\r\n':
-                                #print("wklejam linie")
-                                if typ_pliku=="tekstowy":
-                                    print("tekstowy!")
-                                    saveline=saveline.replace(b'\r\n', b'')
-                                file.write(saveline)
-                                print(saveline)
-                            if saveline == b'+FTPGET: 2,0\r\n':
-                                print("wystapil +FTPGET: 2,0")
-                                return True
-                            else:
-                                print(f"nie wkleiłem: {saveline}")
-                            data.clear()
-                            byte_number = 0
-                    return False
+            byte_number = 0
+            bytes = self._port.read(size+100)
+            print(bytes)
+            if bytes.find(b'ERROR\r\n') > -1:
+                print(bytes)
+                return True #raise Exception("wystapil blad w pobranej ramce")
+            if bytes.find(b'FTPGET: 2,0') > -1:
+                print("brak bajtow do pobrania")
+                return True
+            bytes = re.sub(b'AT\+FTPGET=2,\d+\r\r\n\+FTPGET: 2,\d+\r\n', b'', bytes)
+            bytes=bytes.replace(b'\r\nOK\r\n', b'')
+            with open(nameSaveFile, 'ab+') as file:
+                file.write(bytes)
+            return False
+            #sy = sx.replace(b'\r\nOK\r\n', b'')
 
-                    #print(bytes)
-                    #lines = []
-                    #lines = bytes.split(b'\n')
-                    #pprint(lines)
-                    #for number in range(len(lines)-1):
-                    #    if lines[number] != b'AT+FTPGET=2,1024\r\r' \
-                    #        and lines[number] != b'+FTPGET: 2,1024\r' \
-                    #        and lines[number] != b'OK\r':
-                    #        # and lines[number] != b'AT+FTPGET=2,'+str.encode(str(size))+b'\r\r' \
-                    #        file.write(lines[number]+b'\n')
+            #lines = self.split_data(bytes)
+            #print(bytes)
+            #pprint(lines)
+            #self.delete_redundant_line(lines, nameSaveFile)
 
-                        #elif lines[number] != b'+FTPGET: 2,0\r':
-                        #    print(f"uwaga {lines[number]}")
-                        #    and lines[number] != b'ERROR\r':
-                        #    break
-                        #else:
-                        #    print(f"nie drukuje {lines[number]}")
-                    #file.write(bytes)
-
-                    #while True:
-                    #    #print("z")
-                    #    byte = self._port.read(1)
-                    #    #print(byte)
-                    #    byte_number = byte_number + 1
-                    #    if not byte:
-                    #        break
-                    #    data.append(byte)
-                    #    #print(data)
-                    #    if byte_number > 50 or byte == b'\n':
-                    #        print("ahoj")
-                    #        print(self.concatenate_list_data(data))
-                    #        if byte_line_start == self.concatenate_list_data(data):
-                    #            print("wykrylem rozpoczecie pliku")
-                    #            find_start_line = True
-                    #        # OK\r\n - jest czescia komendy at
-                    #        if find_start_line == True and self.concatenate_list_data(data) != b'OK\r\n':
-                    #            print("wklejam linie")
-                    #            saveline = self.concatenate_list_data(data)
-                    #            file.write(saveline)
-                    #            print(saveline)
-                    #        data.clear()
-                    #        byte_number = 0
-                        #else:
-                        #    print(f"RETURN_CMD: {data}\n")
-                            #return data
-                return data
-        except Exception as e:
-            print("przy zapisie pliku coś poszło nie tak")
-            traceback.print_exc()
+        #except Exception as e:
+        #    print("przy zapisie pliku coś poszło nie tak")
+        #    traceback.print_exc()
         logging.debug("koniec _send_cmd_and_save_answer")
+        #return data
 
     def _read_sent_data(self, numberOfBytes):
         logging.debug("_read_send_data method")
