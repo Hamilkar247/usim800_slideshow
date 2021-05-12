@@ -149,14 +149,15 @@ class request_ftp(communicate_slideshow):
                 os.remove(self._ftp_get_name_file)
             print(f"ahoj nameSaveFile {self._ftp_get_name_file}")
             number = 0
-            flaga_przerwij=False
-            while(flaga_przerwij==False):# and number < 5):  #      print(f"liczba bitow:{liczba_bitow}")
+            flaga_przerwij='trwa'
+            while(flaga_przerwij=='trwa'):# and number < 5):  #      print(f"liczba bitow:{liczba_bitow}")
                 cmd = f'AT+FTPGET=2,{1024}'
                 print(f"wczytano liczbe bitow: {1024}")
-                flaga_przerwij=self._send_cmd_and_save_answer(cmd,
-                                    nameSaveFile=self._ftp_get_name_file, return_data=True,
-                                    byte_line_start=self._startFileLine, read=True)
+                flaga_przerwij=self._send_cmd_and_save_answer(cmd, nameSaveFile=self._ftp_get_name_file,
+                                                              return_data=True, read=True)
                 number = number+1
+            if flaga_przerwij=='blad':
+                return False
         except Exception as e:
             print("Niestety - nie udało się pobrać pliku z serwera ftp")
             print(f"{e}")
