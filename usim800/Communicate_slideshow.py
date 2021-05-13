@@ -30,7 +30,7 @@ class communicate_slideshow:
         receive = self._port.read(14816)
 
     def _send_cmd(self, cmd, t=1, bytes=14816, return_data=False, printio=False
-                  , get_decode_data=False, read=True):
+                  , get_decode_data=False, read=True, check_error=False):
         cmd = self._setcmd(cmd)
         print("KOMENDA: " + str(cmd))
         self._port.write(cmd.encode())
@@ -47,10 +47,13 @@ class communicate_slideshow:
                 print(receive.decode())
             if return_data:
                 print(f"RETURN_CMD: {receive}\n")
+                if check_error == True:
+                    if receive.find(b'ERROR\r\n') > -1:
+                        raise Exception("odpowiedz serwera zawiera blad!")
                 return receive
 
-    def _send_cmd_and_save_answer(self, cmd, t=1, size=10000, typ_pliku="bitowy",
-                                  read=True, return_data=True, printio=False, nameSaveFile="default.txt", byte_line_start=b''):
+    def _send_cmd_and_save_answer(self, cmd, nameSaveFile, t=1, size=10000,
+                                  read=True, return_data=True, printio=False):
         print(f"SIZE {size}")
         cmd = self._setcmd(cmd)
         print("KOMENDA: " + str(cmd))
@@ -64,15 +67,13 @@ class communicate_slideshow:
             print(bytes)
             if bytes.find(b'ERROR\r\n') > -1:
                 print(bytes)
-                return 'blad'
+                return b'blad'
             if bytes.find(b'FTPGET: 2,0') > -1:
                 print("brak bajtow do pobrania")
-                return 'koniec'
-            bytes = re.sub(b'AT\+FTPGET=2,\d+\r\r\n\+FTPGET: 2,\d+\r\n', b'', bytes)
-            bytes=bytes.replace(b'\r\nOK\r\n', b'')
-            with open(nameSaveFile, 'ab+') as file:
-                file.write(bytes)
-            return 'trwa'
+                return b'koniec'
+            #with open(nameSaveFile, 'ab+') as file:
+            #    file.write(bytes)
+            return bytes
         logging.debug("koniec _send_cmd_and_save_answer")
 
     def _read_sent_data(self, numberOfBytes):

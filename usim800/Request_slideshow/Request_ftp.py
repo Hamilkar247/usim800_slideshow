@@ -1,6 +1,8 @@
 import os
+import re
 import sys
 import traceback
+from pprint import pprint
 
 from usim800_slideshow.usim800.Communicate_slideshow import communicate_slideshow
 import logging
@@ -23,14 +25,11 @@ class request_ftp(communicate_slideshow):
         self._ftp_put_path_file = None
         self._ftp_text_to_post = None
         self._sleep_to_read_bytes = None
-        self._extensionFile = None
-        self._startFileLine= None
-        self._png_startFile=b'\x89PNG\r\n'
-        self._json_startFile=b'{\n'
         self._APN = None
         self._status_code = None
         self._numberOfBytes = None
         self._IP = None
+        self._file_bytes = b''
 
     def init(self):
         pass
@@ -46,13 +45,14 @@ class request_ftp(communicate_slideshow):
             return None
 
     def getFilesMetadata(self, APN, server_ip,
-                         port, mode, put_path_file,
+                         port, mode, get_path_file,
                          nickname, password):
         logging.debug("getFilesMetadata")
+        self.init()
         self._ftp_server_ip = server_ip
         self._ftp_port = port
         self._ftp_mode = mode
-        self._ftp_put_path_file = put_path_file
+        self._ftp_get_path_file = get_path_file
         self._ftp_nickname = nickname
         self._ftp_pass = password
         self._APN = APN
@@ -60,46 +60,55 @@ class request_ftp(communicate_slideshow):
         #nadanie IP
         self._IP = self.polaczenie_z_siecia_i_nadania_ip()
         if self._IP is None or self._IP == b'':
-            return False
+            return b'error'
         # inicjalizacja polaczenia FTP
 
         try:
             cmd = 'AT+FTPCID=1'
             self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPSERV={self._ftp_server_ip}"
-            self._send_cmd(cmd, return_data=True)
+            self._send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPPORT=21"
-            self._send_cmd(cmd, return_data=True)
+            self._send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPUN={self._ftp_nickname}"
-            self._send_cmd(cmd, return_data=True)
+            self._send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPPW={self._ftp_pass}"
-            self._send_cmd(cmd, return_data=True)
-            cmd = f"AT+FTPPUTPATH={self._ftp_put_path_file}"
-            self._send_cmd(cmd, return_data=True)
+            self._send_cmd(cmd, return_data=True, check_error=True)
+            cmd = f"AT+FTPGETPATH={self._ftp_get_path_file}"
+            self._send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPSCONT"  # zapisuje ustawiona konfiguracje
             self._send_cmd(cmd, return_data=True)
         except Exception as e:
             print(f"przy podlaczaniu do FTP wystapil blad {e}")
             traceback.print_exc()
+            return b'error'
 
         try:
-            #cmd = f"AT+FTPLIST=2,0"
-            #####inicjalizacja pobrania listy metadanych plikow
+            cmd = "AT+SAPBR=2,1"
+            self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPLIST=1"
-            self._send_cmd(cmd, return_data=True, t=3)
+            self._send_cmd(cmd, return_data=True, t=4, check_error=True)
             cmd = f"AT+FTPLIST=2,1024"
-            files_metadane=self._send_cmd(cmd, return_data=True, t=1)
-            #print(files_metadane)
-            return files_metadane
+            files_metadane=self._send_cmd(cmd, return_data=True, t=4, check_error=True)
+            print(f"files metadane {files_metadane}")
+            files_metadane = re.sub(b'AT\+FTPLIST=2,\d+\r\r\n\+FTPLIST: 2,\d+\r\n', b'', files_metadane)
+            files_metadane = re.sub(b'\r\nOK\r\n', b'', files_metadane)
+            print("po usunieciu ramki FTP")
+            pprint(files_metadane)
+            if files_metadane != b'':
+                return files_metadane
+            else:
+                raise Exception("nie pobralo danych!")
         except Exception as e:
             print(f"przy probie sprawdzanie metadanych plików na serwerze FTP wystąpił błąd ")
             traceback.print_exc()
+            return b'error'
+        logging.debug("koniec getFilesMetadata")
 
-    def getFile(self, APN, server_ip, port, mode, sleep_to_read_bytes,
+    def getFile(self, APN, server_ip, port, mode,
                 get_name_file, get_path_file, nickname, password):
         logging.debug("jest w getFile")
         self.init()
-        self._sleep_to_read_bytes = sleep_to_read_bytes
         self._ftp_server_ip = server_ip
         self._ftp_port = port
         self._ftp_mode = mode
@@ -119,22 +128,24 @@ class request_ftp(communicate_slideshow):
             cmd = 'AT+FTPCID=1'
             self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPSERV={self._ftp_server_ip}"
-            self._send_cmd(cmd, return_data=True)
+            self._send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPPORT=21"
-            self._send_cmd(cmd, return_data=True)
+            self._send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPUN={self._ftp_nickname}"
-            self._send_cmd(cmd, return_data=True)
+            self._send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPPW={self._ftp_pass}"
-            self._send_cmd(cmd, return_data=True)
+            self._send_cmd(cmd, return_data=True, check_error=True)
+            #print(f"ahjo ftpgetname {self._ftp_get_name_file}")
             cmd = f"AT+FTPGETNAME={self._ftp_get_name_file}"
-            self._send_cmd(cmd, return_data=True)
+            self._send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPGETPATH={self._ftp_get_path_file}"
-            self._send_cmd(cmd, return_data=True)
+            self._send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPSCONT"  #zapisuje ustawiona konfiguracje
             self._send_cmd(cmd, return_data=True)
         except Exception as e:
             print(f"przy podlaczaniu do FTP wystapil blad {e}")
             traceback.print_exc()
+            return False
 
         try:
             cmd = "AT+SAPBR=2,1"
@@ -144,27 +155,30 @@ class request_ftp(communicate_slideshow):
             cmd = f"AT+FTPQUIT"
             self._send_cmd(cmd, return_data=True, t=1)
             cmd = f"AT+FTPGET=1"
-            ahoj=self._send_cmd(cmd, get_decode_data=False, return_data=True, t=self._sleep_to_read_bytes)
-            if os.path.isfile(self._ftp_get_name_file):
-                os.remove(self._ftp_get_name_file)
-            print(f"ahoj nameSaveFile {self._ftp_get_name_file}")
+            self._send_cmd(cmd, get_decode_data=False, return_data=True, t=2)
             number = 0
-            flaga_przerwij='trwa'
-            while(flaga_przerwij=='trwa'):# and number < 5):  #      print(f"liczba bitow:{liczba_bitow}")
+            file_bytes=b''
+            packet_of_bytes=b''
+            while packet_of_bytes != b'koniec' and packet_of_bytes != b'error': # and number < 5):  #      print(f"liczba bitow:{liczba_bitow}")
                 cmd = f'AT+FTPGET=2,{1024}'
                 print(f"wczytano liczbe bitow: {1024}")
-                flaga_przerwij=self._send_cmd_and_save_answer(cmd, nameSaveFile=self._ftp_get_name_file,
-                                                              return_data=True, read=True)
+                packet_of_bytes = self._send_cmd_and_save_answer(\
+                                cmd, nameSaveFile=self._ftp_get_name_file, return_data=True, read=True)
+                packet_of_bytes = re.sub(b'AT\+FTPGET=2,\d+\r\r\n\+FTPGET: 2,\d+\r\n', b'', packet_of_bytes)
+                packet_of_bytes = re.sub(b'\r\nOK\r\n', b'', packet_of_bytes)
+                if packet_of_bytes != b'koniec' and packet_of_bytes != b'error':
+                    file_bytes = file_bytes + packet_of_bytes
+                if packet_of_bytes == b'error':
+                    raise Exception("wystapil blad przy pobieraniu danych!")
                 number = number+1
-            if flaga_przerwij=='blad':
-                return False
+
         except Exception as e:
             print("Niestety - nie udało się pobrać pliku z serwera ftp")
             print(f"{e}")
             traceback.print_exc()
             return False
-        logging.debug("koniec pliku")
-        return True
+        logging.debug("koniec ftp - getFile")
+        return file_bytes
 
     def parserFTPEXTGET_file(self):
         try:
