@@ -29,8 +29,28 @@ class communicate_slideshow:
         self._port.write(self._setcmd("AT").encode())
         receive = self._port.read(14816)
 
-    def _send_cmd(self, cmd, t=1, bytes=14816, return_data=False, printio=False
-                  , get_decode_data=False, read=True, check_error=False):
+    def _loop_send_cmd(self, cmd, t=1, bytes=1024, return_data=False, printio=False, get_decode_data=False,
+                       read=True, check_error=False, i_wait_for=b'', how_many_iteration_test=5):
+        number = 0
+        while number < how_many_iteration_test:
+            answer = self._send_cmd(cmd, t=t, bytes=bytes, return_data=return_data,
+                        printio=printio, get_decode_data=get_decode_data, read=read, check_error=check_error)
+            if answer.find(b'\r\nERROR\r\n') > -1:
+                print(answer)
+                number = number + 1
+            if i_wait_for!=b'' and answer.find(i_wait_for) == -1:
+                print("ahoj")
+                print(answer)
+                number = number + 1
+            else:
+                return answer
+            print("resetuje buffery")
+            #self._port.reset_input_buffer()
+            #self._port.reset_output_buffer()
+        return answer
+
+    def _send_cmd(self, cmd, t=1, bytes=1024, return_data=False, printio=False
+                  , get_decode_data=False, read=True, check_error=False, i_wait_for='+FTPGET: 1,1'):
         cmd = self._setcmd(cmd)
         print("KOMENDA: " + str(cmd))
         self._port.write(cmd.encode())
@@ -61,13 +81,12 @@ class communicate_slideshow:
         if read:
             if os.path.isfile(nameSaveFile):
                 pass
-
             byte_number = 0
             bytes = self._port.read(size+100)
             print(bytes)
             if bytes.find(b'ERROR\r\n') > -1:
                 print(bytes)
-                return b'blad'
+                return b'error'
             if bytes.find(b'FTPGET: 2,0') > -1:
                 print("brak bajtow do pobrania")
                 return b'koniec'
