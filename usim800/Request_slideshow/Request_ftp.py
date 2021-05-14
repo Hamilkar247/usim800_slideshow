@@ -86,18 +86,22 @@ class request_ftp(communicate_slideshow):
 
         # inicjalizacja polaczenia FTP
         try:
+            cmd = 'AT+FTPQUIT'
+            self._send_cmd(cmd, return_data=True)
+            cmd = 'AT'
+            self._send_cmd(cmd, return_data=True)
             cmd = 'AT+FTPCID=1'
             self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPSERV={self._ftp_server_ip}"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPPORT=21"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPUN={self._ftp_nickname}"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPPW={self._ftp_pass}"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPGETPATH={self._ftp_get_path_file}"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPSCONT"  # zapisuje ustawiona konfiguracje
             self._send_cmd(cmd, return_data=True)
         except Exception as e:
@@ -106,21 +110,23 @@ class request_ftp(communicate_slideshow):
             return b'error'
 
         try:
-            cmd = "AT+SAPBR=2,1"
-            self._send_cmd(cmd, return_data=True)
+            # nadanie IP
+            self.czyIpJestNadane_jesliNiePrzydziel()
             cmd = f"AT+FTPLIST=1"
-            self._send_cmd(cmd, return_data=True, t=4, check_error=True)
+            self._loop_send_cmd(cmd, return_data=True, t=4, check_error=True, i_wait_for=b'+FTPLIST: 1,1')
             cmd = f"AT+FTPLIST=2,1024"
-            files_metadane = self._send_cmd(cmd, return_data=True, t=4, check_error=True)
+            files_metadane = self._send_cmd(cmd, bytes=1024, return_data=True, t=2, check_error=True)
             print(f"files metadane {files_metadane}")
             files_metadane = re.sub(b'AT\+FTPLIST=2,\d+\r\r\n\+FTPLIST: 2,\d+\r\n', b'', files_metadane)
             files_metadane = re.sub(b'\r\nOK\r\n', b'', files_metadane)
             print("po usunieciu ramki FTP")
             pprint(files_metadane)
             if files_metadane != b'':
+                cmd = 'AT+FTPQUIT '
+                self._send_cmd(cmd, return_data=4)
                 return files_metadane
             else:
-                raise Exception("nie pobralo danych!")
+                raise Exception("nie pobralo metadanych folderu z serwera!" )
         except Exception as e:
             print(f"przy probie sprawdzanie metadanych plików na serwerze FTP wystąpił błąd ")
             traceback.print_exc()
@@ -146,45 +152,46 @@ class request_ftp(communicate_slideshow):
         print(f"{self._IP}")
         # inicjalizacja polaczenia FTP
         try:
+            cmd = 'AT'
+            self._send_cmd(cmd, return_data=True)
             cmd = 'AT+FTPCID=1'
             self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPSERV={self._ftp_server_ip}"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._loop_send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPPORT=21"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPUN={self._ftp_nickname}"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPPW={self._ftp_pass}"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             # print(f"ahjo ftpgetname {self._ftp_get_name_file}")
             cmd = f"AT+FTPGETNAME={self._ftp_get_name_file}"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._loop_send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPGETPATH={self._ftp_get_path_file}"
-            self._send_cmd(cmd, return_data=True, check_error=True)
+            self._loop_send_cmd(cmd, return_data=True, check_error=True)
             cmd = f"AT+FTPSCONT"  # zapisuje ustawiona konfiguracje
-            self._send_cmd(cmd, return_data=True)
+            self._loop_send_cmd(cmd, return_data=True)
         except Exception as e:
             print(f"przy podlaczaniu do FTP wystapil blad {e}")
             traceback.print_exc()
-            return False
+            return b'error'
 
         try:
             cmd = "AT+SAPBR=2,1"
             self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPSCONT?"
             self._send_cmd(cmd, return_data=True)
-            cmd = f"AT+FTPQUIT"
-            self._send_cmd(cmd, return_data=True, t=1)
             cmd = f"AT+FTPGET=1"
-            self._send_cmd(cmd, get_decode_data=False, return_data=True, t=2)
+            self._loop_send_cmd(cmd, get_decode_data=False, return_data=True, t=2, i_wait_for=b'+FTPGET: 1,1')
+            print("ahoj")
             number = 0
             file_bytes = b''
             packet_of_bytes = b''
             while packet_of_bytes != b'koniec' and packet_of_bytes != b'error':  # and number < 5):  #      print(f"liczba bitow:{liczba_bitow}")
                 cmd = f'AT+FTPGET=2,{1024}'
                 print(f"wczytano liczbe bitow: {1024}")
-                packet_of_bytes = self._send_cmd_and_save_answer( \
-                    cmd, nameSaveFile=self._ftp_get_name_file, return_data=True, read=True)
+                packet_of_bytes = self._send_cmd_and_save_answer(
+                    cmd, size=1024, nameSaveFile=self._ftp_get_name_file, return_data=True, read=True)
                 packet_of_bytes = re.sub(b'AT\+FTPGET=2,\d+\r\r\n\+FTPGET: 2,\d+\r\n', b'', packet_of_bytes)
                 packet_of_bytes = re.sub(b'\r\nOK\r\n', b'', packet_of_bytes)
                 if packet_of_bytes != b'koniec' and packet_of_bytes != b'error':
@@ -197,7 +204,7 @@ class request_ftp(communicate_slideshow):
             print("Niestety - nie udało się pobrać pliku z serwera ftp")
             print(f"{e}")
             traceback.print_exc()
-            return False
+            return b'error'
         logging.debug("koniec ftp - getFile")
         return file_bytes
 
