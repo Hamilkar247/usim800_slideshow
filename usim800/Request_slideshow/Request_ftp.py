@@ -241,32 +241,25 @@ class request_ftp(communicate_slideshow):
         self._ftp_text_to_post = text_to_post
         self._APN = APN
 
-        try:
-            self._IP = self._bearer(self._APN)
-        except Exception as e:
-            print(f"przy przydzielaniu IP urządzeniu wystpił błąd {e}")
-            # traceback.print_exc()
+        # nadanie IP
+        self.czyIpJestNadane_jesliNiePrzydziel()
 
         try:
             # inicjalizacja polaczenia FTP
             cmd = 'AT+FTPCID=1'
             self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPSERV={self._ftp_server_ip}"
-            self._send_cmd(cmd, return_data=True)
+            self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPPORT=21"
-            self._send_cmd(cmd, return_data=True)
+            self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPUN={self._ftp_nickname}"
-            self._send_cmd(cmd, return_data=True)
+            self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPPW={self._ftp_pass}"
-            self._send_cmd(cmd, return_data=True)
+            self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPPUTNAME={self._ftp_put_name_file}"
-            self._send_cmd(cmd, return_data=True)
+            self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPPUTPATH={self._ftp_put_path_file}"
-            self._send_cmd(cmd, return_data=True)
-            cmd = f"AT+FTPGETNAME={self._ftp_get_name_file}"
-            self._send_cmd(cmd, return_data=True)
-            cmd = f"AT+FTPGETPATH={self._ftp_get_path_file}"
-            self._send_cmd(cmd, return_data=True)
+            self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPSCONT"
             self._send_cmd(cmd, return_data=True)
         except Exception as e:
@@ -274,13 +267,13 @@ class request_ftp(communicate_slideshow):
             traceback.print_exc()
 
         cmd = f"AT+FTPPUT=1"
-        ftpput_1 = self._send_cmd(cmd, return_data=True, t=3)  # musimy odczekać do FTP 1,1,1360
+        ftpput_1 = self._loop_send_cmd(cmd, return_data=True, t=3, i_wait_for=b'+FTPPUT: 1,1,1360')  # musimy odczekać do FTP 1,1,1360
 
         print("text_to_post: " + self._ftp_text_to_post)
         print(f"{ftpput_1}")
-        print(f"rozmiar w bajtach: {self.utf8len(self._ftp_text_to_post)}")
+        print(f"rozmiar w bajtach: {self.utf8len(self._ftp_text_to_post)+24}")
         cmd = f"AT+FTPPUT=2,{self.utf8len(self._ftp_text_to_post)}"
-        self._send_cmd(cmd, return_data=True, t=4)
+        self._send_cmd(cmd, return_data=True, t=3)
         self._send_cmd(self._ftp_text_to_post, return_data=True)
         cmd = f"AT+FTPPUT=2,0"
         self._send_cmd(cmd, return_data=True)

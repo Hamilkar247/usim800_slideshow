@@ -44,7 +44,7 @@ class communicate_slideshow:
                 number = number + 1
             else:
                 return answer
-            print("resetuje buffery")
+            #print("resetuje buffery")
             #self._port.reset_input_buffer()
             #self._port.reset_output_buffer()
         return answer
