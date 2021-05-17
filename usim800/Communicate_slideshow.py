@@ -29,6 +29,11 @@ class communicate_slideshow:
         self._port.write(self._setcmd("AT").encode())
         receive = self._port.read(14816)
 
+    def _reset_bytes_bufor(self):
+        print("resetuje buffery")
+        self._port.reset_input_buffer()
+        self._port.reset_output_buffer()
+
     def _loop_send_cmd(self, cmd, t=1, bytes=1024, return_data=False, printio=False, get_decode_data=False,
                        read=True, check_error=False, i_wait_for=b'', how_many_iteration_test=5):
         number = 0
@@ -36,8 +41,13 @@ class communicate_slideshow:
             answer = self._send_cmd(cmd, t=t, bytes=bytes, return_data=return_data,
                         printio=printio, get_decode_data=get_decode_data, read=read, check_error=check_error)
             if answer.find(b'\r\nERROR\r\n') > -1:
+                print("wystapil blad")
                 print(answer)
                 number = number + 1
+                at_cmd="AT+TESTS"
+                self._send_cmd(at_cmd, return_data=return_data)
+                receive = self._port.read(14816)
+                print()
             if i_wait_for!=b'' and answer.find(i_wait_for) == -1:
                 print("ahoj")
                 print(answer)
@@ -49,7 +59,7 @@ class communicate_slideshow:
             #self._port.reset_output_buffer()
         return answer
 
-    def _send_cmd(self, cmd, t=1, bytes=1024, return_data=False, printio=False
+    def _send_cmd(self, cmd, t=1.5, bytes=1024, return_data=False, printio=False
                   , get_decode_data=False, read=True, check_error=False, i_wait_for='+FTPGET: 1,1'):
         cmd = self._setcmd(cmd)
         print("KOMENDA: " + str(cmd))
@@ -79,19 +89,19 @@ class communicate_slideshow:
         print("KOMENDA: " + str(cmd))
         self._port.write(cmd.encode())
         if read:
+            time.sleep(t)
             if os.path.isfile(nameSaveFile):
                 pass
             byte_number = 0
             bytes = self._port.read(size+100)
-            print(bytes)
+            if printio == True:
+                print(bytes)
             if bytes.find(b'ERROR\r\n') > -1:
                 print(bytes)
                 return b'error'
             if bytes.find(b'FTPGET: 2,0') > -1:
                 print("brak bajtow do pobrania")
                 return b'koniec'
-            #with open(nameSaveFile, 'ab+') as file:
-            #    file.write(bytes)
             return bytes
         logging.debug("koniec _send_cmd_and_save_answer")
 
