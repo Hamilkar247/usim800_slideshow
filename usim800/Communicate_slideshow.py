@@ -46,8 +46,8 @@ class communicate_slideshow:
                 number = number + 1
                 at_cmd="AT+TESTS"
                 self._send_cmd(at_cmd, return_data=return_data)
-                receive = self._port.read(14816)
-                print()
+                receive = self._port.read(bytes+100)
+                print(receive)
             if i_wait_for!=b'' and answer.find(i_wait_for) == -1:
                 print("ahoj")
                 print(answer)
@@ -83,7 +83,8 @@ class communicate_slideshow:
                 return receive
 
     def _send_cmd_and_save_answer(self, cmd, nameSaveFile, t=1, size=10000,
-                                  read=True, return_data=True, printio=False):
+                                  read=True, return_data=True, printio=False,
+                                  print_to_file=True):
         print(f"SIZE {size}")
         cmd = self._setcmd(cmd)
         print("KOMENDA: " + str(cmd))
@@ -94,6 +95,11 @@ class communicate_slideshow:
                 pass
             byte_number = 0
             bytes = self._port.read(size+100)
+
+            if print_to_file == True:
+                with open(nameSaveFile + '.log', 'wb+') as file:
+                    file.write(bytes)
+
             if printio == True:
                 print(bytes)
             if bytes.find(b'ERROR\r\n') > -1:
