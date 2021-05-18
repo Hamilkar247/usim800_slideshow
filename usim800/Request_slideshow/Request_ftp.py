@@ -44,9 +44,6 @@ class request_ftp(communicate_slideshow):
             print(f"przy przydzielaniu IP urządzeniu wystpił błąd {e}")
             return None
 
-    #kiedy zaszedl reset sim800L
-
-
 
     def czyIpJestNadane_jesliNiePrzydziel(self):
         cmd = "AT"
@@ -95,8 +92,8 @@ class request_ftp(communicate_slideshow):
             #self._send_cmd(cmd, return_data=True)
             #cmd = 'AT'
             #self._send_cmd(cmd, return_data=True)
-            cmd = 'AT+FTPCID=1'
-            self._send_cmd(cmd, return_data=True)
+            #cmd = 'AT+FTPCID=1'
+            #self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPSERV={self._ftp_server_ip}"
             self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPPORT=21"
@@ -118,7 +115,7 @@ class request_ftp(communicate_slideshow):
             # nadanie IP
             self.czyIpJestNadane_jesliNiePrzydziel()
             cmd = f"AT+FTPLIST=1"
-            self._loop_send_cmd(cmd, return_data=True, how_many_iteration_test=4, t=4, i_wait_for=b'+FTPLIST: 1,1')
+            self._loop_send_cmd(cmd, return_data=True, how_many_iteration_test=5, t=5, i_wait_for=b'+FTPLIST: 1,1')
             cmd = f"AT+FTPLIST=2,1024"
             files_metadane = self._send_cmd(cmd, bytes=1024, return_data=True, t=2, i_wait_for=b'+FTPLIST: 2,0')
             print(f"files metadane {files_metadane}")
@@ -126,6 +123,9 @@ class request_ftp(communicate_slideshow):
             files_metadane = re.sub(b'\r\nOK\r\n', b'', files_metadane)
             print("po usunieciu ramki FTP")
             pprint(files_metadane)
+            #zakończenie polaczenie FTPLIST
+            cmd = f"AT+FTPLIST=2,0"
+            self._send_cmd(cmd, bytes=1024, return_data=True, t=2, i_wait_for=b'+FTPLIST: 2,0')
             if files_metadane != b'':
                 return files_metadane
             else:
@@ -134,6 +134,7 @@ class request_ftp(communicate_slideshow):
             print(f"przy probie sprawdzanie metadanych plików na serwerze FTP wystąpił błąd ")
             traceback.print_exc()
             return b'error'
+
         self._reset_bytes_bufor()
         logging.debug("koniec getFilesMetadata")
 
@@ -191,7 +192,7 @@ class request_ftp(communicate_slideshow):
             cmd = f"AT+FTPSCONT?"
             self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPGET=1"
-            self._loop_send_cmd(cmd, get_decode_data=False, return_data=True, t=2, i_wait_for=b'+FTPGET: 1,1')
+            self._loop_send_cmd(cmd, get_decode_data=False, return_data=True, t=3, i_wait_for=b'+FTPGET: 1,1')
             print("ahoj")
             number = 0
             file_bytes = b''
@@ -202,7 +203,7 @@ class request_ftp(communicate_slideshow):
                 print(f"wczytano liczbe bitow: {size_of_bytes_in_packet}")
                 packet_of_bytes = self._send_cmd_and_save_answer(cmd, t=1
                     , size=size_of_bytes_in_packet, nameSaveFile=self._ftp_get_name_file, return_data=True, read=True
-                    , printio=False)
+                    , printio=False, print_to_file=True)
                 packet_of_bytes = re.sub(b'AT\+FTPGET=2,\d+\r\r\n\+FTPGET: 2,\d+\r\n', b'', packet_of_bytes)
                 packet_of_bytes = re.sub(b'\r\nOK\r\n', b'', packet_of_bytes)
                 if packet_of_bytes != b'koniec' and packet_of_bytes != b'error':
