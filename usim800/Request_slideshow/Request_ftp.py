@@ -23,7 +23,7 @@ class request_ftp(communicate_slideshow):
         self._ftp_get_path_file = None
         self._ftp_put_name_file = None
         self._ftp_put_path_file = None
-        self._ftp_text_to_post = None
+        self._ftp_text_to_post = []
         self._sleep_to_read_bytes = None
         self._APN = None
         self._status_code = None
@@ -259,6 +259,8 @@ class request_ftp(communicate_slideshow):
         self.czyIpJestNadane_jesliNiePrzydziel()
 
         try:
+            cmd = 'AT'
+            self._send_cmd(cmd, return_data=True)
             # inicjalizacja polaczenia FTP
             cmd = 'AT+FTPCID=1'
             self._send_cmd(cmd, return_data=True)
@@ -280,17 +282,36 @@ class request_ftp(communicate_slideshow):
             print(f"przy podlaczaniu do FTP wystapil blad {e}")
             traceback.print_exc()
 
-        cmd = f"AT+FTPPUT=1"
-        ftpput_1 = self._loop_send_cmd(cmd, return_data=True, t=3, i_wait_for=b'+FTPPUT: 1,1,1360')  # musimy odczekać do FTP 1,1,1360
+        # nadanie IP
+        self.czyIpJestNadane_jesliNiePrzydziel()
 
-        print("text_to_post: " + self._ftp_text_to_post)
-        print(f"{ftpput_1}")
-        print(f"rozmiar w bajtach: {self.utf8len(self._ftp_text_to_post)+24}")
-        cmd = f"AT+FTPPUT=2,{self.utf8len(self._ftp_text_to_post)}"
-        self._send_cmd(cmd, return_data=True, t=3)
-        self._send_cmd(self._ftp_text_to_post, return_data=True)
-        cmd = f"AT+FTPPUT=2,0"
-        self._send_cmd(cmd, return_data=True)
+        try:
+            cmd = f"AT+FTPPUT=1"
+            ftpput_1 = self._loop_send_cmd(cmd, return_data=True, t=3, i_wait_for=b'+FTPPUT: 1,1,1360')  # musimy odczekać do FTP 1,1,1360
+            print(f"{ftpput_1}")
+            print("text_to_post: ")
+            pprint(self._ftp_text_to_post)
+            for packet in self._ftp_text_to_post:
+                print(packet)
+
+            number = 0
+            for packet in self._ftp_text_to_post:
+                print("petla while")
+                number = number + 1
+                print(number)
+                cmd = f"AT+FTPPUT=2,{self.utf8len(packet)}"
+                self._send_cmd(cmd, return_data=True, t=3)
+                print("print pierwsze 1024 bytes")
+                self._send_cmd(str(packet), return_data=True, t=3)
+            cmd = f"AT+FTPPUT=2,0"
+            self._send_cmd(cmd, return_data=True)
+        except Exception as e:
+            print("Niestety - nie udało się wysłać plik na serwer ftp")
+            print(f"{e}")
+            traceback.print_exc()
+            return b'error'
+        logging.debug("koniec post-owania pliku na serwer ftp")
+        self._reset_bytes_bufor()
 
         # cmd = f"AT+SAPBR=2,1"
         # self._send_cmd(cmd, return_data=True)
