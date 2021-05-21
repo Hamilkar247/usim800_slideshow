@@ -4,6 +4,8 @@ import sys
 import traceback
 from pprint import pprint
 
+from gpiozero import LED
+
 from usim800_slideshow.usim800.Communicate_slideshow import communicate_slideshow
 import logging
 import time
@@ -13,6 +15,7 @@ class request_ftp(communicate_slideshow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._reset_pin = None
         self._status_code = None
         self._ftp_server_ip = None
         self._ftp_port = None
@@ -37,13 +40,15 @@ class request_ftp(communicate_slideshow):
     def utf8len(self, s):
         return len(s.encode('utf-8'))
 
+    def set_reset_pin(self, reset_pin):
+        self._reset_pin = reset_pin
+
     def polaczenie_z_siecia_i_nadania_ip(self):
         try:
             return self._bearer(self._APN)
         except Exception as e:
             print(f"przy przydzielaniu IP urządzeniu wystpił błąd {e}")
             return None
-
 
     def czyIpJestNadane_jesliNiePrzydziel(self):
         cmd = "AT"
@@ -69,9 +74,25 @@ class request_ftp(communicate_slideshow):
             print(IP)
             self._IP = IP
 
+    def reset_sim800(self):
+        print(f"resetuje SIM800L, reset pin {self._reset_pin}")
+        #PIN GPIO4 na raspberry pi zero
+        gpio4 = LED(self._reset_pin)
+        gpio4.on()
+        print("3,3V")
+        time.sleep(2)
+        gpio4.off()
+        print("0V")
+        time.sleep(2)
+        cmd = 'AT'
+        self._send_cmd(cmd, return_data=True, t=1)
+        cmd = 'AT'
+        self._send_cmd(cmd, return_data=True, t=1)
+
     def getFilesMetadata(self, APN, server_ip,
                          port, mode, get_path_file,
                          nickname, password):
+        self.reset_sim800()
         logging.debug("getFilesMetadata")
         self.init()
         self._ftp_server_ip = server_ip
@@ -81,6 +102,7 @@ class request_ftp(communicate_slideshow):
         self._ftp_nickname = nickname
         self._ftp_pass = password
         self._APN = APN
+
 
         # nadanie IP
         self.czyIpJestNadane_jesliNiePrzydziel()
@@ -140,7 +162,7 @@ class request_ftp(communicate_slideshow):
 
     def getFile(self, APN, server_ip, port, mode,
                 get_name_file, get_path_file, nickname, password):
-
+        self.reset_sim800()
         logging.debug("jest w getFile")
         self.init()
         self._ftp_server_ip = server_ip
@@ -242,6 +264,7 @@ class request_ftp(communicate_slideshow):
     def postFile(self, APN, server_ip, port, mode, put_name_file, put_path_file,
                  get_name_file, get_path_file,
                  nickname, password, text_to_post):
+        self.reset_sim800()
         logging.debug("jestem w postFile")
         self._ftp_server_ip = server_ip
         self._ftp_port = port
@@ -312,24 +335,3 @@ class request_ftp(communicate_slideshow):
             return b'error'
         logging.debug("koniec post-owania pliku na serwer ftp")
         self._reset_bytes_bufor()
-
-        # cmd = f"AT+SAPBR=2,1"
-        # self._send_cmd(cmd, return_data=True)
-        # cmd = f"AT+FTPSCONT?"
-        # self._send_cmd(cmd, return_data=True)
-
-        ##### pobierz zawartosc pliku
-        # cmd = f"AT+FTPGET=1"
-        # self._send_cmd(cmd, return_data=True, t=3)
-        # cmd = f"AT+FTPGET=2,1024"
-        # self._send_cmd(cmd, return_data=True, t=3)
-
-        ##### ls na plikach na serwerze
-        # cmd = f"AT+FTPLIST=1"
-        # self._send_cmd(cmd, return_data=True, t=3)
-        # cmd = f"AT+FTPLIST=2,1024"
-        # self._send_cmd(cmd, return_data=True, t=6)
-        # self._send
-        # if ftpput_1 == b"+FTPPUT: 1,1,1360":
-        #    print(f"{ftpput_1} - oczekuje na przeslanie wiadomosci")
-        # else:
