@@ -23,10 +23,11 @@ class sim800_slideshow(communicate_slideshow):
 class ftp_slideshow(communicate_slideshow):
     TIMEOUT = 1
 
-    def __init__(self, baudrate, path):
+    def __init__(self, baudrate, path, reset_pin):
         logging.debug("ftp")
         self.port = serial.Serial(path, baudrate, timeout=ftp_slideshow.TIMEOUT)
         print("port: " + str(self.port))
         super().__init__(self.port)
 
         self.request_ftp = request_ftp(self.port)
+        self.request_ftp.set_reset_pin(reset_pin)
