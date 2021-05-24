@@ -75,19 +75,24 @@ class request_ftp(communicate_slideshow):
             self._IP = IP
 
     def reset_sim800(self):
+        logging.debug(f"resetuje SIM800L, reset pin {self._reset_pin}")
         print(f"resetuje SIM800L, reset pin {self._reset_pin}")
         #PIN GPIO4 na raspberry pi zero
         gpio4 = LED(self._reset_pin)
         gpio4.on()
         print("3,3V")
+        logging.debug(f"3,3V")
         time.sleep(2)
         gpio4.off()
         print("0V")
+        logging.debug(f"0V")
         time.sleep(2)
         cmd = 'AT'
-        self._send_cmd(cmd, return_data=True, t=1)
+        return_data=self._send_cmd(cmd, return_data=True, t=1)
+        logging.debug(return_data)
         cmd = 'AT'
-        self._send_cmd(cmd, return_data=True, t=1)
+        return_data=self._send_cmd(cmd, return_data=True, t=1)
+        logging.debug(return_data)
 
     def getFilesMetadata(self, APN, server_ip,
                          port, mode, get_path_file,
