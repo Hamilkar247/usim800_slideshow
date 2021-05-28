@@ -82,7 +82,36 @@ class communicate_slideshow:
                         raise Exception("odpowiedz serwera zawiera blad!")
                 return receive
 
-    def _send_cmd_and_save_answer(self, cmd, nameSaveFile, t=1, size=10000,
+    def _send_cmd_and_save_answer_list_of_files(self, cmd, nameSaveFile, t=1, size=1024,
+                                            read=True, return_data=True, printio=False,
+                                            print_to_file=True):
+        print(f"SIZE {size}")
+        cmd = self._setcmd(cmd)
+        print("KOMENDA: " + str(cmd))
+        self._port.write(cmd.encode())
+        if read:
+            time.sleep(t)
+            if os.path.isfile(nameSaveFile):
+                pass
+            byte_number = 0
+            bytes = self._port.read(size+100)
+
+            if print_to_file == True:
+                with open(nameSaveFile + '.log', 'wb+') as file:
+                    file.write(bytes)
+
+            if printio == True:
+                print(bytes)
+            if bytes.find(b'ERROR\r\n') > -1:
+                print(bytes)
+                return b'error'
+            if bytes.find(b'FTPLIST: 2,0') > -1:
+                print("brak bajtow do pobrania")
+                return b'koniec'
+            return bytes
+        logging.debug("koniec _send_cmd_and_save_answer_list_of_files")
+
+    def _send_cmd_and_save_answer_file(self, cmd, nameSaveFile, t=1, size=10000,
                                   read=True, return_data=True, printio=False,
                                   print_to_file=True):
         print(f"SIZE {size}")
@@ -109,7 +138,7 @@ class communicate_slideshow:
                 print("brak bajtow do pobrania")
                 return b'koniec'
             return bytes
-        logging.debug("koniec _send_cmd_and_save_answer")
+        logging.debug("koniec _send_cmd_and_save_answer_file")
 
     def _read_sent_data(self, numberOfBytes):
         logging.debug("_read_send_data method")
