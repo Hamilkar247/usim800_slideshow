@@ -75,24 +75,27 @@ class request_ftp(communicate_slideshow):
             self._IP = IP
 
     def reset_sim800(self):
-        logging.debug(f"resetuje SIM800L, reset pin {self._reset_pin}")
-        print(f"resetuje SIM800L, reset pin {self._reset_pin}")
-        #PIN GPIO4 na raspberry pi zero
-        gpio4 = LED(self._reset_pin)
-        gpio4.on()
-        print("3,3V")
-        logging.debug(f"3,3V")
-        time.sleep(2)
-        gpio4.off()
-        print("0V")
-        logging.debug(f"0V")
-        time.sleep(2)
-        cmd = 'AT'
-        return_data=self._send_cmd(cmd, return_data=True, t=1)
-        logging.debug(return_data)
-        cmd = 'AT'
-        return_data=self._send_cmd(cmd, return_data=True, t=1)
-        logging.debug(return_data)
+        if self._reset_pin != "brak":
+            logging.debug(f"resetuje SIM800L, reset pin {self._reset_pin}")
+            print(f"resetuje SIM800L, reset pin {self._reset_pin}")
+            #PIN GPIO4 na raspberry pi zero
+            gpio4 = LED(self._reset_pin)
+            gpio4.on()
+            print("3,3V")
+            logging.debug(f"3,3V")
+            time.sleep(2)
+            gpio4.off()
+            print("0V")
+            logging.debug(f"0V")
+            time.sleep(2)
+            cmd = 'AT'
+            return_data=self._send_cmd(cmd, return_data=True, t=1)
+            logging.debug(return_data)
+            cmd = 'AT'
+            return_data=self._send_cmd(cmd, return_data=True, t=1)
+            logging.debug(return_data)
+        else:
+            logging.debug("nie ma ustawionego pinu do resetu")
 
     def getFilesMetadata(self, APN, server_ip,
                          port, mode, get_path_file,
@@ -107,7 +110,6 @@ class request_ftp(communicate_slideshow):
         self._ftp_nickname = nickname
         self._ftp_pass = password
         self._APN = APN
-
 
         # nadanie IP
         self.czyIpJestNadane_jesliNiePrzydziel()
@@ -143,20 +145,29 @@ class request_ftp(communicate_slideshow):
             self.czyIpJestNadane_jesliNiePrzydziel()
             cmd = f"AT+FTPLIST=1"
             self._loop_send_cmd(cmd, return_data=True, how_many_iteration_test=5, t=5, i_wait_for=b'+FTPLIST: 1,1')
-            cmd = f"AT+FTPLIST=2,1024"
-            files_metadane = self._send_cmd(cmd, bytes=1024, return_data=True, t=2, i_wait_for=b'+FTPLIST: 2,0')
-            print(f"files metadane {files_metadane}")
-            files_metadane = re.sub(b'AT\+FTPLIST=2,\d+\r\r\n\+FTPLIST: 2,\d+\r\n', b'', files_metadane)
-            files_metadane = re.sub(b'\r\nOK\r\n', b'', files_metadane)
-            print("po usunieciu ramki FTP")
-            pprint(files_metadane)
-            #zakończenie polaczenie FTPLIST
-            cmd = f"AT+FTPLIST=2,0"
-            self._send_cmd(cmd, bytes=1024, return_data=True, t=2, i_wait_for=b'+FTPLIST: 2,0')
-            if files_metadane != b'':
-                return files_metadane
-            else:
-                raise Exception("nie pobralo metadanych folderu z serwera!" )
+            number = 0
+            list_of_files = b''
+            packet_of_bytes = b''
+            size_of_bytes_in_packet = 1024
+            while packet_of_bytes != b'koniec' and packet_of_bytes != b'error':
+                cmd = f"AT+FTPLIST=2,{size_of_bytes_in_packet}"
+                print(f"wczytano liczbe bajtow {size_of_bytes_in_packet}")
+                packet_of_bytes = self._send_cmd_and_save_answer_list_of_files(cmd, t=2, size=size_of_bytes_in_packet,
+                                                    bytes=1024, nameSaveFile="ftp_list", return_data=True, read=True,
+                                                    printio=False, print_to_file=True)
+                packet_of_bytes = re.sub(b'AT\+FTPLIST=2,\d+\r\r\n\+FTPLIST: 2,\d+\r\n', b'', packet_of_bytes)
+                packet_of_bytes = re.sub(b'\r\nOK\r\n', b'', packet_of_bytes)
+                if packet_of_bytes != b'koniec' and packet_of_bytes != b'error':
+                    list_of_files = list_of_files + packet_of_bytes
+                if packet_of_bytes == b'error':
+                    raise Exception("wystapil blad przy pobieraniu danych!")
+                #zakończenie polaczenie FTPLIST
+                cmd = f"AT+FTPLIST=2,0"
+                self._send_cmd(cmd, bytes=1024, return_data=True, t=2, i_wait_for=b'+FTPLIST: 2,0')
+                if list_of_files != b'':
+                    return list_of_files
+                else:
+                    raise Exception("nie pobralo metadanych folderu z serwera!" )
         except Exception as e:
             print(f"przy probie sprawdzanie metadanych plików na serwerze FTP wystąpił błąd ")
             traceback.print_exc()
@@ -227,8 +238,8 @@ class request_ftp(communicate_slideshow):
             size_of_bytes_in_packet = 1024
             while packet_of_bytes != b'koniec' and packet_of_bytes != b'error':  # and number < 5):  #      print(f"liczba bitow:{liczba_bitow}")
                 cmd = f'AT+FTPGET=2,{size_of_bytes_in_packet}'
-                print(f"wczytano liczbe bitow: {size_of_bytes_in_packet}")
-                packet_of_bytes = self._send_cmd_and_save_answer(cmd, t=1
+                print(f"wczytano liczbe bajtów: {size_of_bytes_in_packet}")
+                packet_of_bytes = self._send_cmd_and_save_answer_file(cmd, t=1
                     , size=size_of_bytes_in_packet, nameSaveFile=self._ftp_get_name_file, return_data=True, read=True
                     , printio=False, print_to_file=True)
                 packet_of_bytes = re.sub(b'AT\+FTPGET=2,\d+\r\r\n\+FTPGET: 2,\d+\r\n', b'', packet_of_bytes)
