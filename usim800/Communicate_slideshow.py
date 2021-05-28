@@ -95,12 +95,10 @@ class communicate_slideshow:
                 pass
             byte_number = 0
             bytes = self._port.read(size+100)
-
-            if print_to_file == True:
+            if print_to_file:
                 with open(nameSaveFile + '.log', 'wb+') as file:
                     file.write(bytes)
-
-            if printio == True:
+            if printio:
                 print(bytes)
             if bytes.find(b'ERROR\r\n') > -1:
                 print(bytes)
@@ -124,12 +122,10 @@ class communicate_slideshow:
                 pass
             byte_number = 0
             bytes = self._port.read(size+100)
-
-            if print_to_file == True:
+            if print_to_file:
                 with open(nameSaveFile + '.log', 'wb+') as file:
                     file.write(bytes)
-
-            if printio == True:
+            if printio:
                 print(bytes)
             if bytes.find(b'ERROR\r\n') > -1:
                 print(bytes)
