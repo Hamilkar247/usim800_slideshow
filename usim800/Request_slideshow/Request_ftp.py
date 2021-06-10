@@ -16,6 +16,7 @@ class request_ftp(communicate_slideshow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._reset_pin = None
+        self._time_packet_ftp = None
         self._status_code = None
         self._ftp_server_ip = None
         self._ftp_port = None
@@ -42,6 +43,9 @@ class request_ftp(communicate_slideshow):
 
     def set_reset_pin(self, reset_pin):
         self._reset_pin = reset_pin
+
+    def set_time_packet_ftp(self, time_packet_ftp):
+        self._time_packet_ftp = time_packet_ftp
 
     def polaczenie_z_siecia_i_nadania_ip(self):
         try:
@@ -152,7 +156,7 @@ class request_ftp(communicate_slideshow):
             while packet_of_bytes != b'koniec' and packet_of_bytes != b'error':
                 cmd = f"AT+FTPLIST=2,{size_of_bytes_in_packet}"
                 print(f"wczytano liczbe bajtow {size_of_bytes_in_packet}")
-                packet_of_bytes = self._send_cmd_and_save_answer_list_of_files(cmd, t=2, size=size_of_bytes_in_packet,
+                packet_of_bytes = self._send_cmd_and_save_answer_list_of_files(cmd, t=self._time_packet_ftp, size=size_of_bytes_in_packet,
                                                     nameSaveFile="ftp_list", return_data=True, read=True,
                                                     printio=False, print_to_file=True)
                 packet_of_bytes = re.sub(b'AT\+FTPLIST=2,\d+\r\r\n\+FTPLIST: 2,\d+\r\n', b'', packet_of_bytes)
@@ -235,7 +239,8 @@ class request_ftp(communicate_slideshow):
             while packet_of_bytes != b'koniec' and packet_of_bytes != b'error':  # and number < 5):  #      print(f"liczba bitow:{liczba_bitow}")
                 cmd = f'AT+FTPGET=2,{size_of_bytes_in_packet}'
                 print(f"wczytano liczbe bajtów: {size_of_bytes_in_packet}")
-                packet_of_bytes = self._send_cmd_and_save_answer_file(cmd, t=1,
+                print(f"czas oczekiwania na każdy pakiet i baudrate: t:{self._time_packet_ftp}")
+                packet_of_bytes = self._send_cmd_and_save_answer_file(cmd, t=self._time_packet_ftp,
                     size=size_of_bytes_in_packet, nameSaveFile=self._ftp_get_name_file,
                     return_data=True, read=True, printio=False, print_to_file=True)
                 packet_of_bytes = re.sub(b'AT\+FTPGET=2,\d+\r\r\n\+FTPGET: 2,\d+\r\n', b'', packet_of_bytes)
