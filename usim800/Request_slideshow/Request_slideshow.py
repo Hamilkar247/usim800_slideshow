@@ -138,12 +138,12 @@ class request_slideshow(communicate_slideshow):
         try:
             time.sleep(1)
             logging.debug(f"receive HTTPREAD")
-            cmd = "AT +HTTPREAD"
+            cmd = "AT+HTTPREAD"
             self._send_cmd_and_save_answer(cmd, t=self._sleep_to_read_bytes, size=self._numberOfBytes
                                            , nameSaveFile=self._nameOfFile, byte_line_start=self._startFileLine)
         except Exception as e:
             print(f"wystapil blad w receiveHTTPREAD treść {e}")
             traceback.print_exc()
-        cmd = "AT +HTTPTERM"
+        cmd = "AT+HTTPTERM"
         logging.debug(f"{cmd}")
         self._send_cmd(cmd)
