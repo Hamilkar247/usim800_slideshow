@@ -136,6 +136,8 @@ class communicate_slideshow:
             return bytes
         logging.debug("koniec _send_cmd_and_save_answer_file")
 
+
+
     def _read_sent_data(self, numberOfBytes):
         logging.debug("_read_send_data method")
         receive = self._port.read(numberOfBytes)
