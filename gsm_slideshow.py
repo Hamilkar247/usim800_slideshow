@@ -21,6 +21,7 @@ class GsmSlideshow:
         except Exception as e:
             print("Niestety jest błąd - wyrzuciło download_file w GsmSlideshow")
             print(f"{e}")
+            traceback.print_exc()
         logging.debug("koniec pliku")
 
 

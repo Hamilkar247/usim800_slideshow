@@ -59,8 +59,10 @@ class communicate_slideshow:
             #self._port.reset_output_buffer()
         return answer
 
-    def _send_cmd(self, cmd, t=1.5, bytes=1024, return_data=False, printio=False
-                  , get_decode_data=False, read=True, check_error=False, i_wait_for='+FTPGET: 1,1'):
+    def _send_cmd(self, cmd, return_data, t=1.5, bytes=1024, printio=False
+                  , get_decode_data=False, read=True, check_error=False, i_wait_for='+FTPGET: 1,1'
+                  ):
+        print(f"ahjo ! return_data: {return_data} ")
         cmd = self._setcmd(cmd)
         print("KOMENDA: " + str(cmd))
         self._port.write(cmd.encode())
@@ -69,7 +71,33 @@ class communicate_slideshow:
             if not get_decode_data:
                 receive = self._port.read(bytes)
                 print(f"DECODE_CMD_ANSWER: {receive}")
+            else:
+                receive = None
+                print(f"DECODE_CMD_ANSWER: receive is None")
+            if printio:
+                print(receive.decode())
+            #self._port.read(bytes)
+            print(f"ahjo ! return_data: {return_data}")
+            if return_data:
+                print(f"RETURN_CMD: {receive}\n")
+                if check_error == True:
+                    if receive.find(b'ERROR\r\n') > -1:
+                        raise Exception("odpowiedz serwera zawiera blad!")
+                return receive
 
+            return receive
+
+    def _send_cmd(self, cmd, return_data=False, t=1.5, bytes=1024, printio=False
+                  , get_decode_data=False, read=True, check_error=False, i_wait_for='+FTPGET: 1,1'
+                  ):
+        cmd = self._setcmd(cmd)
+        print("KOMENDA: " + str(cmd))
+        self._port.write(cmd.encode())
+        if read:
+            time.sleep(t)
+            if not get_decode_data:
+                receive = self._port.read(bytes)
+                print(f"DECODE_CMD_ANSWER: {receive}")
             else:
                 receive = None
                 print(f"DECODE_CMD_ANSWER: receive is None")
@@ -81,6 +109,8 @@ class communicate_slideshow:
                     if receive.find(b'ERROR\r\n') > -1:
                         raise Exception("odpowiedz serwera zawiera blad!")
                 return receive
+
+            return receive
 
     def _send_cmd_and_save_answer_list_of_files(self, cmd, nameSaveFile, t=1, size=1024,
                                             read=True, return_data=True, printio=False,
@@ -136,12 +166,59 @@ class communicate_slideshow:
             return bytes
         logging.debug("koniec _send_cmd_and_save_answer_file")
 
+    def _http_send_cmd_and_save_answer(self, cmd, t=1, size=10000
+             , read=True, printio=False, nameSaveFile="default.txt"):
+        cmd = self._setcmd(cmd)
+        self._port.write(cmd.encode())
+        find_start_line=False
+        try:
+            if read:
+                self.size=size
+                data=[]
+                if os.path.isfile(nameSaveFile):
+                    print("uwaga nadpisuje obecny plik")
+                with open(nameSaveFile, 'wb') as file:
+                    linia = 0
+                    byte_number = 0
+                    while True:
+                        byte = self._port.read(1)
+                        byte_number = byte_number+1
+                        if not byte:
+                            break
+                        data.append(byte)
+                        if byte_number > 10:
+                            linia=linia+1
+                            saveline = self.concatenate_list_data(data)
+                            file.write(saveline)
+                            print(saveline)
+                        if byte_number > 50 or byte == b'\n':
+                            logging.debug(self.concatenate_list_data(data))
+                            if b'\x89PNG\r\n' == self.concatenate_list_data(data):
+                                logging.debug("wykrylem rozpoczecie pliku")
+                                find_start_line = True
+                            #OK\r\n - jest czescia komendy at
+                            if find_start_line == True and self.concatenate_list_data(data) != b'OK\r\n':
+                                #logging.debug("wklejam linie")
+                                saveline = self.concatenate_list_data(data)
+                                file.write(saveline)
+                                #print(saveline)
+                            data.clear()
+                            byte_number = 0
 
+        except Exception as e:
+            print("przy zapisie pliku coś poszło nie tak")
+            traceback.print_exc()
+        logging.debug("koniec _send_cmd_and_save_answer")
 
-    def _read_sent_data(self, numberOfBytes):
-        logging.debug("_read_send_data method")
-        receive = self._port.read(numberOfBytes)
-        logging.debug(f"zapisane {receive}")
+    def _read_sent_data(self, cmd, numberOfBytes, sleep_to_read_bytes):
+        #logging.debug("_read_send_data method")
+        print("_read_sent_data")
+        cmd = self._setcmd(cmd)
+        print("KOMENDA: " + str(cmd))
+        self._port.write(cmd.encode())
+        time.sleep(sleep_to_read_bytes)
+        receive = self._port.read(numberOfBytes) #numberOfBytes)
+        #logging.debug(f"zapisane {receive}")
         return receive
 
     def _bearer(self, APN):  # myśle że chodzi w nazwie o definiowanie nośnej
@@ -157,26 +234,12 @@ class communicate_slideshow:
         cmd = f'AT+SAPBR=3,1,"APN","{APN}"'
         self._send_cmd(cmd, return_data=True)
         cmd = "AT+SAPBR=1,1"
-        self._send_cmd(cmd)
+        self._send_cmd(cmd, return_data=False)
         cmd = "AT+SAPBR=2,1"
         ip_answer_bytes = self._send_cmd(cmd, return_data=True)
         logging.debug("przydzielanie IP")
         IP = self.parserIPNumber(ip_answer_bytes)
         return IP
-
-    def takeIP(self, data):
-        logging.debug("takeIP method")
-        logging.debug(f"start data {data}")
-
-        stringIP = data
-        logging.debug(f"{stringIP.split()}")
-        logging.debug(f"{stringIP.split()[2]}")
-        stringIP = stringIP.split()[2]
-        p = re.compile('"(.*)"')
-        print(p.findall(stringIP)[0])
-        stringIP = p.findall(stringIP)[0]
-        print(stringIP)
-        return stringIP.decode()
 
     def parserIPNumber(self, bytes):
         logging.debug("parserIPNumber method")
