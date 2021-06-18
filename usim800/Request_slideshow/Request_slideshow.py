@@ -110,6 +110,37 @@ class request_slideshow(communicate_slideshow):
             return_data=self._send_cmd(cmd, return_data=True, t=1)
             logging.debug(return_data)
 
+    def polaczenie_z_siecia_i_nadania_ip(self):
+        try:
+            return self._bearer(self._APN)
+        except Exception as e:
+            print(f"przy przydzielaniu IP urządzeniu wystpił błąd {e}")
+            return None
+
+    def czyIpJestNadane_jesliNiePrzydziel(self):
+        cmd = "AT"
+        self._send_cmd(cmd, return_data=True, t=1)
+        cmd = "AT+SAPBR=2,1"
+        ip_answer = b''
+        ip_answer = self._send_cmd(cmd, return_data=True, t=1)
+        if ip_answer.find(b'0.0.0.0') > -1:
+            print("ip_answer.find(b'0.0.0.0')")
+            self._IP = self.polaczenie_z_siecia_i_nadania_ip()
+        if ip_answer.find(b'ERROR\r\n') > -1:
+            print("ip_answer.find(b'ERROR\r\n') > -1")
+            self._IP = self.polaczenie_z_siecia_i_nadania_ip()
+        if ip_answer == b'':
+            print("ip_answer == b''")
+            self._IP = self.polaczenie_z_siecia_i_nadania_ip()
+        if ip_answer is None:
+            print("ip_answer is None")
+            self._IP = self.polaczenie_z_siecia_i_nadania_ip()
+        else:
+            IP = re.sub(b'AT\+SAPBR=2,1\r\r\n\+SAPBR: 1,1,\"', b'', ip_answer)
+            IP = re.sub(b'\"\r\n\r\nOK\r\n', b'', IP)
+            print(IP)
+            self._IP = IP
+
     def getFile(self, url,  sleep_to_read_bytes, nameOfFile):
         logging.debug("Jestem w getFile")
         self.reset_sim800()
@@ -117,10 +148,8 @@ class request_slideshow(communicate_slideshow):
         self._url = url
         self._sleep_to_read_bytes = sleep_to_read_bytes
         self._nameOfFile = nameOfFile
-        try:
-          self._IP = self._bearer(self._APN)
-        except Exception as e:
-            print(f"przy przydzielaniu IP urządzeniu wystąpił błąd {e}")
+        # nadanie IP
+        self.czyIpJestNadane_jesliNiePrzydziel()
 
         #inicjalizacja połączenia HTTP
         cmd = 'AT+HTTPTERM'
@@ -147,43 +176,8 @@ class request_slideshow(communicate_slideshow):
             print(f"tresc błędu {e}")
             traceback.print_exc()
             return False
-        print("pobierania zdjecia czesciami")
-        #jesli wczesniej nam zwrocil sim800 brak pamieci na tak ciezkie zdjecie
         if self._status_code == b'602':
-            print("pobierania zdjecia czesciami")
-            if os.path.exists(self._nameOfFile+".download"):
-                os.remove(self._nameOfFile+".download")
-            end_picture = open(self._nameOfFile+".download", "ab")
-            x=0
-            while True:
-                print(x)
-                name_part = self._nameOfFile+"_"+str(x)
-                cmd = f'AT+HTTPPARA="URL","http://134.122.69.201/porcjonowanie_zdjec/kozienice/{self._nameOfFile}_{x}"'
-                self._send_cmd(cmd, return_data=False)
-                # ustawia nam _status_code i _number_of_bytes
-                self.parserHTTPACTION(cmd)
-                #if self._status_code ==
-                try:
-                    print("try catch")
-                    print(self._status_code)
-                    if self._status_code == b'200':
-                        print("receiveHTTTPREAD")
-                        result = self.receiveHTTTPREAD()
-                    else:
-                        print(f"blad {self._status_code}")
-                    #else:
-                    #    print(f"status_code: {self._status_code}")
-                    #    if self._status_code == b'602':
-                    #        print(f"brak pamieci w urządzeniu {self._status_code}")
-                    #        return False
-                except Exception as e:
-                    print("Wystapil blad przy odbieraniu danych")
-                    print(f"tresc błędu {e}")
-                    traceback.print_exc()
-                    return False
-                x=x+1
-        else:
-            print(f"ahjo ! {self._status_code}")
+            return False
         return True
 
     def parserHTTPACTION(self, cmd):
@@ -225,21 +219,30 @@ class request_slideshow(communicate_slideshow):
             readBytes=0
             #if os.path.exists(self._nameOfFile+".download"):
             #    os.remove(self._nameOfFile+".download")
-            packet_number = 1024
-            koniec = False
-            while koniec == False:
-                if int(self._numberOfBytes) > readBytes + packet_number:
-                    file = self._read_sent_data(cmd, numberOfBytes=packet_number, sleep_to_read_bytes=0.1)
-                else:
-                    file = self._read_sent_data(cmd, numberOfBytes=int(self._numberOfBytes)-readBytes+100, sleep_to_read_bytes=0.1)
-                    koniec=True
-                file = re.sub(b'AT\+HTTPREAD\r\r\n\+HTTPREAD: \d+\r\n', b'', file)
-                file = re.sub(b'\r\nOK\r\n', b'', file)
-                with open(self._nameOfFile+".download", "ab+") as f:
-                    print(f"pierwsze 5 znakow {file[0:4]}")
-                    f.write(file)
-                readBytes = readBytes + packet_number
-                print(readBytes)
+            stream_of_bytes = self._read_sent_data(cmd, packetOfBytes=int(self._numberOfBytes)+100, sleep_to_read_bytes=100)
+            with open(self._nameOfFile, "wb") as f:
+                print(f"pierwsze 5 znakow {stream_of_bytes[0:4]}")
+                print(f"strlen {len(stream_of_bytes)}")
+                stream_of_bytes = re.sub(b'AT\+HTTPREAD\r\r\n\+HTTPREAD: \d+\r\n', b'', stream_of_bytes)
+                stream_of_bytes = re.sub(b'\r\nOK\r\n', b'', stream_of_bytes)
+                f.write(stream_of_bytes)
+
+            ###$$packet_number = 2048
+            ###$$koniec = False
+            ###$$while koniec == False:
+            ###$$    if int(self._numberOfBytes) > readBytes + packet_number:
+            ###$$        stream_of_bytes = self._read_sent_data(cmd, packetOfBytes=packet_number, sleep_to_read_bytes=0.5)
+            ###$$    else:
+            ###$$        stream_of_bytes = self._read_sent_data(cmd, packetOfBytes=int(self._numberOfBytes)-readBytes+100, sleep_to_read_bytes=0.5)
+            ###$$        koniec=True
+            ###$$    stream_of_bytes = re.sub(b'AT\+HTTPREAD\r\r\n\+HTTPREAD: \d+\r\n', b'', stream_of_bytes)
+            ###$$    stream_of_bytes = re.sub(b'\r\nOK\r\n', b'', stream_of_bytes)
+            ###$$    with open(self._nameOfFile, "wb") as f:
+            ###$$        print(f"pierwsze 5 znakow {stream_of_bytes[0:4]}")
+            ###$$        print(f"strlen {len(stream_of_bytes)}")
+            ###$$        f.write(stream_of_bytes)
+            ###$$    readBytes = readBytes + packet_number
+            ###$$    print(readBytes)
             print("ahojjjjjjjjjjjj ! ")
         except Exception as e:
             print(f"wystapil blad w receiveHTTPREAD treść {e}")
