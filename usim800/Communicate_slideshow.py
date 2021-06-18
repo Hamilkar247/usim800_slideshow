@@ -70,7 +70,7 @@ class communicate_slideshow:
             time.sleep(t)
             if not get_decode_data:
                 receive = self._port.read(bytes)
-                print(f"DECODE_CMD_ANSWER: {receive}")
+                #print(f"DECODE_CMD_ANSWER : {receive}")
             else:
                 receive = None
                 print(f"DECODE_CMD_ANSWER: receive is None")
@@ -210,14 +210,14 @@ class communicate_slideshow:
             traceback.print_exc()
         logging.debug("koniec _send_cmd_and_save_answer")
 
-    def _read_sent_data(self, cmd, numberOfBytes, sleep_to_read_bytes):
+    def _read_sent_data(self, cmd, packetOfBytes, sleep_to_read_bytes):
         #logging.debug("_read_send_data method")
         print("_read_sent_data")
         cmd = self._setcmd(cmd)
         print("KOMENDA: " + str(cmd))
         self._port.write(cmd.encode())
         time.sleep(sleep_to_read_bytes)
-        receive = self._port.read(numberOfBytes) #numberOfBytes)
+        receive = self._port.read(packetOfBytes) #numberOfBytes)
         #logging.debug(f"zapisane {receive}")
         return receive
 
