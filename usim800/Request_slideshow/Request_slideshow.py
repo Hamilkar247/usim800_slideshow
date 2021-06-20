@@ -219,7 +219,7 @@ class request_slideshow(communicate_slideshow):
             readBytes=0
             #if os.path.exists(self._nameOfFile+".download"):
             #    os.remove(self._nameOfFile+".download")
-            stream_of_bytes = self._read_sent_data(cmd, packetOfBytes=int(self._numberOfBytes)+100, sleep_to_read_bytes=100)
+            stream_of_bytes = self._read_sent_data(cmd, packetOfBytes=int(self._numberOfBytes)+100, sleep_to_read_bytes=self._sleep_to_read_bytes)
             with open(self._nameOfFile, "wb") as f:
                 print(f"pierwsze 5 znakow {stream_of_bytes[0:4]}")
                 print(f"strlen {len(stream_of_bytes)}")
