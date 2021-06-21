@@ -9,36 +9,34 @@ from usim800_slideshow.usim800.Request_slideshow import request_ftp
 class sim800_slideshow(communicate_slideshow):
     TIMEOUT = 1
 
-    def __init__(self, baudrate, path, reset_pin):
-        logging.debug("dziendobry sim800_slideshow")
+    def __init__(self, baudrate, path, APN, sleep_to_read_bytes,
+                 reset_pin, time_packet_ftp):
+        logging.debug("sim800_slideshow http i ftp")
         self.port = serial.Serial(path, baudrate, timeout=sim800_slideshow.TIMEOUT)
         print("port: " + str(self.port))
         super().__init__(self.port)
 
         self.requests = request_slideshow(self.port)
         self.requests.set_reset_pin(reset_pin)
+        self.requests.set_APN(APN)
+        self.requests.set_sleep_to_read_bytes(sleep_to_read_bytes=sleep_to_read_bytes)
+
+        self.request_ftp = request_ftp(self.port)
+        self.request_ftp.set_time_packet_ftp(time_packet_ftp=time_packet_ftp)
+        self.request_ftp.set_reset_pin(reset_pin)
         ###self.info = info(self.port)
         ###self.sms = sms(self.port)
 
-
-class ftp_slideshow(communicate_slideshow):
-    TIMEOUT = 1
-
-    def __init__(self, baudrate, path, reset_pin, time_packet_ftp):
+    def __update__(self, baudrate, path, APN, sleep_to_read_bytes,
+                   reset_pin, time_packet_ftp):
         logging.debug("ftp")
-        self.port = serial.Serial(path, baudrate, timeout=ftp_slideshow.TIMEOUT)
+        self.port = serial.Serial(path, baudrate, timeout=sim800_slideshow.TIMEOUT)
         print("port: " + str(self.port))
         super().__init__(self.port)
 
-        self.request_ftp = request_ftp(self.port)
-        self.request_ftp.set_time_packet_ftp(time_packet_ftp)
-        self.request_ftp.set_reset_pin(reset_pin)
-
-    def __update__(self, baudrate, path, reset_pin, time_packet_ftp):
-        logging.debug("ftp")
-        self.port = serial.Serial(path, baudrate, timeout=ftp_slideshow.TIMEOUT)
-        print("port: " + str(self.port))
-        super().__init__(self.port)
+        self.requests.set_APN(APN=APN)
+        self.requests.set_sleep_to_read_bytes(sleep_to_read_bytes=sleep_to_read_bytes)
+        self.requests.set_reset_pin()
 
         self.request_ftp = request_ftp(self.port)
         self.request_ftp.set_time_packet_ftp(time_packet_ftp)
