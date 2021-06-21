@@ -79,6 +79,7 @@ class request_ftp(communicate_slideshow):
             self._IP = IP
 
     def reset_sim800(self):
+        print(f" ustawiony pin resetu {self._reset_pin}")
         if self._reset_pin != "brak":
             logging.debug(f"resetuje SIM800L, reset pin {self._reset_pin}")
             print(f"resetuje SIM800L, reset pin {self._reset_pin}")

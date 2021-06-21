@@ -26,6 +26,7 @@ class request_slideshow(communicate_slideshow):
         self._IP = None
         self._png_startFile=b'\x89PNG\r\n'
         self._startFileLine=b''
+        self._reset_pin="brak"
 
     def init(self):
         self._status_code = None
@@ -41,6 +42,7 @@ class request_slideshow(communicate_slideshow):
         self._png_startFile=b'\x89PNG\r\n'
         self._json_startFile=b'{\n'
         self._startFileLine=b''
+        self._reset_pin="brak"
 
     @property
     def text(self):
@@ -88,6 +90,12 @@ class request_slideshow(communicate_slideshow):
 
     def set_reset_pin(self, reset_pin):
         self._reset_pin = reset_pin
+
+    def set_APN(self, APN):
+        self._APN = APN
+
+    def set_sleep_to_read_bytes(self, sleep_to_read_bytes):
+        self._sleep_to_read_bytes = sleep_to_read_bytes
 
     def reset_sim800(self):
         if self._reset_pin != "brak":
