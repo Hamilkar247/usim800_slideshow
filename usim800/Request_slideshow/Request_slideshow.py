@@ -24,8 +24,6 @@ class request_slideshow(communicate_slideshow):
         self._content = None
         self._url = None
         self._IP = None
-        self._png_startFile=b'\x89PNG\r\n'
-        self._startFileLine=b''
         self._reset_pin="brak"
 
     def init(self):
@@ -39,9 +37,6 @@ class request_slideshow(communicate_slideshow):
         self._content = None
         self._url = None
         self._IP = None
-        self._png_startFile=b'\x89PNG\r\n'
-        self._json_startFile=b'{\n'
-        self._startFileLine=b''
         self._reset_pin="brak"
 
     @property

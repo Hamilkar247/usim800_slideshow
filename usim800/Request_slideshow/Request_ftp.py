@@ -122,12 +122,6 @@ class request_ftp(communicate_slideshow):
         self._reset_bytes_bufor()
         # inicjalizacja polaczenia FTP
         try:
-            #cmd = 'AT+FTPQUIT'
-            #self._send_cmd(cmd, return_data=True)
-            #cmd = 'AT'
-            #self._send_cmd(cmd, return_data=True)
-            #cmd = 'AT+FTPCID=1'
-            #self._send_cmd(cmd, return_data=True)
             cmd = f"AT+FTPSERV={self._ftp_server_ip}"
             self._loop_send_cmd(cmd, return_data=True, i_wait_for=b'OK')
             cmd = f"AT+FTPPORT=21"
