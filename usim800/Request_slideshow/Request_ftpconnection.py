@@ -1,6 +1,4 @@
-import os
 import re
-import sys
 import traceback
 from pprint import pprint
 
@@ -11,7 +9,7 @@ import logging
 import time
 
 
-class request_ftp(communicate_slideshow):
+class request_ftpconnection(communicate_slideshow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -188,9 +186,8 @@ class request_ftp(communicate_slideshow):
 
         # nadanie IP
         self.czyIpJestNadane_jesliNiePrzydziel()
-
-
         self._reset_bytes_bufor()
+
         print(f"{self._IP}")
         # inicjalizacja polaczenia FTP
         try:
