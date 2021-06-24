@@ -2,8 +2,8 @@ import logging
 
 import serial
 from usim800_slideshow.usim800.Communicate_slideshow import communicate_slideshow
-from usim800_slideshow.usim800.Request_slideshow import request_slideshow
-from usim800_slideshow.usim800.Request_slideshow import request_ftp
+from usim800_slideshow.usim800.Request_slideshow import request_httpconnection
+from usim800_slideshow.usim800.Request_slideshow import request_ftpconnection
 
 
 class sim800_slideshow(communicate_slideshow):
@@ -16,12 +16,12 @@ class sim800_slideshow(communicate_slideshow):
         print("port: " + str(self.port))
         super().__init__(self.port)
 
-        self.requests = request_slideshow(self.port)
+        self.requests = request_httpconnection(self.port)
         self.requests.set_reset_pin(reset_pin)
         self.requests.set_APN(APN)
         self.requests.set_sleep_to_read_bytes(sleep_to_read_bytes=sleep_to_read_bytes)
 
-        self.request_ftp = request_ftp(self.port)
+        self.request_ftp = request_ftpconnection(self.port)
         self.request_ftp.set_time_packet_ftp(time_packet_ftp=time_packet_ftp)
         self.request_ftp.set_reset_pin(reset_pin)
         ###self.info = info(self.port)
@@ -38,6 +38,6 @@ class sim800_slideshow(communicate_slideshow):
         self.requests.set_sleep_to_read_bytes(sleep_to_read_bytes=sleep_to_read_bytes)
         self.requests.set_reset_pin()
 
-        self.request_ftp = request_ftp(self.port)
+        self.request_ftp = request_ftpconnection(self.port)
         self.request_ftp.set_time_packet_ftp(time_packet_ftp)
         self.request_ftp.set_reset_pin(reset_pin)

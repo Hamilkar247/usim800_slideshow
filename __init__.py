@@ -1,1 +1,0 @@
-from usim800_slideshow.gsm_slideshow import GsmSlideshow

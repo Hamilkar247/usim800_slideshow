@@ -9,7 +9,7 @@ import logging
 import time
 
 
-class request_slideshow(communicate_slideshow):
+class request_httpconnection(communicate_slideshow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -173,7 +173,6 @@ class request_slideshow(communicate_slideshow):
                 print(f"status_code: {self._status_code}")
                 if self._status_code == b'602':
                      print(f"brak pamieci w urządzeniu {self._status_code}")
-                #file = self._status_code
         except Exception as e:
             print("Wystapil blad przy odbieraniu danych")
             print(f"tresc błędu {e}")
@@ -218,10 +217,6 @@ class request_slideshow(communicate_slideshow):
             time.sleep(1)
             print(f"receive HTTPREAD")
             cmd = "AT+HTTPREAD"
-            #file = self._http_send_cmd_and_save_answer(cmd, t=self._sleep_to_read_bytes, size=self._numberOfBytes, nameSaveFile="xyz.png")
-            readBytes=0
-            #if os.path.exists(self._nameOfFile+".download"):
-            #    os.remove(self._nameOfFile+".download")
             stream_of_bytes = self._read_sent_data(cmd, packetOfBytes=int(self._numberOfBytes)+100, sleep_to_read_bytes=self._sleep_to_read_bytes)
             with open(self._nameOfFile, "wb") as f:
                 print(f"pierwsze 5 znakow {stream_of_bytes[0:4]}")
@@ -229,31 +224,10 @@ class request_slideshow(communicate_slideshow):
                 stream_of_bytes = re.sub(b'AT\+HTTPREAD\r\r\n\+HTTPREAD: \d+\r\n', b'', stream_of_bytes)
                 stream_of_bytes = re.sub(b'\r\nOK\r\n', b'', stream_of_bytes)
                 f.write(stream_of_bytes)
-
-            ###$$packet_number = 2048
-            ###$$koniec = False
-            ###$$while koniec == False:
-            ###$$    if int(self._numberOfBytes) > readBytes + packet_number:
-            ###$$        stream_of_bytes = self._read_sent_data(cmd, packetOfBytes=packet_number, sleep_to_read_bytes=0.5)
-            ###$$    else:
-            ###$$        stream_of_bytes = self._read_sent_data(cmd, packetOfBytes=int(self._numberOfBytes)-readBytes+100, sleep_to_read_bytes=0.5)
-            ###$$        koniec=True
-            ###$$    stream_of_bytes = re.sub(b'AT\+HTTPREAD\r\r\n\+HTTPREAD: \d+\r\n', b'', stream_of_bytes)
-            ###$$    stream_of_bytes = re.sub(b'\r\nOK\r\n', b'', stream_of_bytes)
-            ###$$    with open(self._nameOfFile, "wb") as f:
-            ###$$        print(f"pierwsze 5 znakow {stream_of_bytes[0:4]}")
-            ###$$        print(f"strlen {len(stream_of_bytes)}")
-            ###$$        f.write(stream_of_bytes)
-            ###$$    readBytes = readBytes + packet_number
-            ###$$    print(readBytes)
-            print("ahojjjjjjjjjjjj ! ")
         except Exception as e:
             print(f"wystapil blad w receiveHTTPREAD treść {e}")
             print(f"{e}")
             traceback.print_exc()
             return False
-        #cmd = "AT+HTTPTERM"
-        #logging.debug(f"{cmd}")
-        #self._send_cmd(cmd, return_data=False)
-        logging.debug("Koniec ftp - getFile")
+        logging.debug("Koniec HTTPREAD - getFile")
         return True
