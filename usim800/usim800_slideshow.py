@@ -36,7 +36,7 @@ class sim800_slideshow(communicate_slideshow):
 
         self.requests.set_APN(APN=APN)
         self.requests.set_sleep_to_read_bytes(sleep_to_read_bytes=sleep_to_read_bytes)
-        self.requests.set_reset_pin()
+        self.requests.set_reset_pin(reset_pin)
 
         self.request_ftp = request_ftpconnection(self.port)
         self.request_ftp.set_time_packet_ftp(time_packet_ftp)
